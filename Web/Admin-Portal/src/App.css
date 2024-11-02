@@ -1,0 +1,219 @@
+:root {
+  --white: #ffffff;
+  --darkgray: #3e3f40;
+  --skyblue: #68e4fc;
+  --babyblue: #ccecff;
+  --blue: #0796d9;
+  --black: #030000;
+  --primary: #89e3fa;
+  --secondary: #ffffff;
+  --lightgray: rgba(185, 179, 182, 0.37);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--darkgray);
+}
+
+body {
+  background-color: var(--white);
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.finSmart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: url(./images/opb.svg) no-repeat center center fixed;
+  background-size: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  font-family: 'Nunito', sans-serif;
+  color: var(--white);
+}
+
+.start {
+  margin-top: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.btn {
+  padding: 10px 20px;
+  margin: 5px;
+  color: var(--white);
+  background: none;
+  border: 1px solid var(--secondary);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.2);
+  text-shadow: 1px 1px 2px var(--white);
+}
+
+.user {
+  background-color: var(--white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.container {
+  margin: 20px auto;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  background: linear-gradient(180deg, rgba(116, 181, 255, 0.5), rgba(25, 228, 255, 0.5) 97%, rgba(147, 202, 247, 0.49));
+  border-radius: 8px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.2), inset 0 0 10px var(--skyblue);
+}
+
+.headerAuth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo1 {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.CLogo {
+  width: 200px;
+  height: auto;
+  margin-bottom: 30px;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.stroke {
+  width: 1px;
+  height: 20px;
+  background: var(--lightgray);
+}
+
+.statusButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: "Inconsolata", sans-serif;
+  color: var(--darkgray);
+  transition: border-bottom 0.3s ease;
+}
+
+.statusButton:hover {
+  border-bottom: 2px solid var(--skyblue);
+}
+
+.statusLabels {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 0 5px var(--skyblue), 0 0 10px var(--primary);
+}
+
+.inputsSection {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+
+.fieldLabel {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--darkgray);
+}
+
+.userNameField,
+.password-row,
+.repeat-password-field {
+  margin: 0.5rem 0;
+}
+
+input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--blue);
+  border-radius: 4px;
+  background: none;
+  color: var(--darkgray);
+  font-size: 1rem;
+}
+
+.showPassword {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--blue);
+  margin-left: 5px;
+}
+
+.submitBtn {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.submit {
+  padding: 0.5rem 2rem;
+  background: var(--blue);
+  color: var(--white);
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px var(--skyblue);
+}
+
+.submit:hover {
+  background: var(--skyblue);
+  box-shadow: 0 0 15px var(--skyblue);
+}
+
+.error-message {
+  color: var(--primary);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+
+/* Navigation Bar */
+.logo2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 140px;
+  margin-left: 40px;
+}
