@@ -43,7 +43,15 @@ npx expo start
 cd Backend
 npm start 
 
-## Installation ##
+## Deployed version ##
+
+Web Link:
+Application Download Link:
+
+
+## Video demo(5mins) ##
+
+
 
 
 
