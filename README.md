@@ -24,7 +24,26 @@ Feedback and support system
 Follow these steps to install and run the application locally:
 
 Clone the repository:
-bash
-Copy code
-git clone https://github.com/your-username/local-government-app.git
-cd local-government-app
+git clone https://github.com/Knirag/Capstone
+cd capstone
+
+** For web review **
+cd web
+cd Admin-Portal
+npm install
+npm run dev
+
+** For Mobile App **
+cd Mobile
+cd front
+npm install 
+npx expo start
+
+** For Backend **
+cd Backend
+npm start 
+
+## Installation ##
+
+
+
