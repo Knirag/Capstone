@@ -10,7 +10,6 @@ import fLogo from "../assets/Images/logo.png";
 import Colours from "../assets/Colours/Colours";
 
 const Nav = styled.div`
-  background: none;
   height: 80px;
   display: flex;
   justify-content: space-between;
@@ -42,7 +41,8 @@ const LogoutButton = styled.div`
 `;
 
 const SidebarNav = styled.nav`
-  background: ${Colours.skyblue};
+  background: ${Colours.lightgray};
+  margin-top: 70px;
   width: 250px;
   height: 100vh;
   display: flex;
@@ -81,7 +81,6 @@ const SidebarLink = styled(Link)`
 `;
 
 const Logo = styled.img`
-  margin-top: auto;
   padding: 20px 0;
   width: 80px;
   height: auto;

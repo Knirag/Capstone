@@ -1,16 +1,13 @@
-const Location = require("../models/Location");
-const User = require("../models/User");
+// controllers/locationController.js
+const pool = require("../config/db");
 
-exports.setLocation = async (req, res) => {
-  const { district, sector, cell, village, address } = req.body;
+exports.getLocations = async (req, res) => {
   try {
-    const location = await Location.create({ district, sector, cell, village,cell, address });
-    await User.update(
-      { locationId: location.id },
-      { where: { id: req.user.id } }
+    const result = await pool.query(
+      "SELECT * FROM locations ORDER BY district, sector, cell, village, address"
     );
-    res.status(201).json({ message: "Location set successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error setting location" });
+    res.status(200).json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving locations", error });
   }
 };

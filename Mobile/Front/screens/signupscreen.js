@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  ScrollView,
   TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -100,6 +101,7 @@ const styles = StyleSheet.create({
 });
 const SignupScreen = () => {
   const [names, setNames] = useState("");
+  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [age, setAge] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -128,121 +130,135 @@ const SignupScreen = () => {
   const navigateToLocation = () => {
     navigation.navigate("Location");
   };
+  const navigateToLogin = () => {
+    navigation.navigate("Login");
+  };
 
   return (
+      <ScrollView>
     <LinearGradient
       style={{ flex: 1 }}
       colors={[Colours.primary, Colours.secondary]}
     >
-      <View style={styles.container}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.heading}>Sign In to Your Account</Text>
-        <View style={styles.subtext}>
-          <Text>Already have an Account?</Text>
-          <TouchableOpacity>
-            <Text
-              style={{ color: Colours.blue, fontWeight: "500", fontSize: 14 }}
-            >
-              {" "}
-              Login
+        <View style={styles.container}>
+          <Image source={require("../assets/logo.png")} style={styles.logo} />
+          <Text style={styles.heading}>Sign In to Your Account</Text>
+          <View style={styles.subtext}>
+            <Text>Already have an Account?</Text>
+            <TouchableOpacity onPress={navigateToLogin}>
+              <Text
+                style={{ color: Colours.blue, fontWeight: "500", fontSize: 14, zIndex: 1 }}
+              >
+                {" "}
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.form}>
+          {/* Names Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Full Names"
+              value={names}
+              onChangeText={setNames}
+            />
+          </View>
+
+          {/* Phone Number Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.countryCode}>+250</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              keyboardType="numeric"
+              value={phoneNumber}
+              onChangeText={handlePhoneNumberChange}
+              maxLength={9} // Limits to 9 digits
+            />
+          </View>
+          {/* Email Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+
+          {/* Age (Calendar for Date of Birth) */}
+          <TouchableOpacity
+            style={styles.inputContainer}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <TextInput
+              style={styles.input}
+              placeholder="Date of Birth"
+              value={age.toDateString()}
+              editable={false} // Disable manual editing
+            />
+            {showDatePicker && (
+              <DateTimePicker
+                value={age}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
+          </TouchableOpacity>
+
+          {/* Password Input */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry={secureText}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={toggleSecureText}>
+              <Icon
+                name={secureText ? "eye-off" : "eye"}
+                size={24}
+                color={Colours.darkgray}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Repeat Password Input */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Repeat Password"
+              secureTextEntry={secureRepeatText}
+              value={repeatPassword}
+              onChangeText={setRepeatPassword}
+            />
+            <TouchableOpacity onPress={toggleSecureRepeatText}>
+              <Icon
+                name={secureRepeatText ? "eye-off" : "eye"}
+                size={24}
+                color={Colours.darkgray}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={navigateToLocation}>
+          <LinearGradient
+            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
+            style={styles.gradientButton}
+          >
+            <Text style={styles.buttonText}>
+              Next <Icon name="caret-forward-outline" style={styles.icon2} />
             </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.form}>
-        {/* Names Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Full Names"
-            value={names}
-            onChangeText={setNames}
-          />
-        </View>
-
-        {/* Phone Number Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.countryCode}>+250</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Phone Number"
-            keyboardType="numeric"
-            value={phoneNumber}
-            onChangeText={handlePhoneNumberChange}
-            maxLength={9} // Limits to 9 digits
-          />
-        </View>
-
-        {/* Age (Calendar for Date of Birth) */}
-        <TouchableOpacity
-          style={styles.inputContainer}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <TextInput
-            style={styles.input}
-            placeholder="Date of Birth"
-            value={age.toDateString()}
-            editable={false} // Disable manual editing
-          />
-          {showDatePicker && (
-            <DateTimePicker
-              value={age}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
+          </LinearGradient>
         </TouchableOpacity>
-
-        {/* Password Input */}
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry={secureText}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity onPress={toggleSecureText}>
-            <Icon
-              name={secureText ? "eye-off" : "eye"}
-              size={24}
-              color={Colours.darkgray}
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Repeat Password Input */}
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Repeat Password"
-            secureTextEntry={secureRepeatText}
-            value={repeatPassword}
-            onChangeText={setRepeatPassword}
-          />
-          <TouchableOpacity onPress={toggleSecureRepeatText}>
-            <Icon
-              name={secureRepeatText ? "eye-off" : "eye"}
-              size={24}
-              color={Colours.darkgray}
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <TouchableOpacity style={styles.button} onPress={navigateToLocation}>
-        <LinearGradient
-          colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
-          style={styles.gradientButton}
-        >
-          <Text style={styles.buttonText}>
-            Next <Icon name="caret-forward-outline" style={styles.icon2} />
-          </Text>
-        </LinearGradient>
-      </TouchableOpacity>
     </LinearGradient>
+      </ScrollView>
   );
 };
 

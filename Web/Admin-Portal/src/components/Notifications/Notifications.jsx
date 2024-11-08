@@ -29,6 +29,15 @@ const Label = styled.label`
   margin-bottom: 8px;
 `;
 
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid ${Colours.lightgray};
+  margin-bottom: 20px;
+`;
+
 const TextArea = styled.textarea`
   width: 100%;
   height: 100px;
@@ -98,15 +107,19 @@ const NotificationContent = styled.p`
 const Notifications = () => {
   const [message, setMessage] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [notificationHistory, setNotificationHistory] = useState([
     {
       title: "System Update",
       date: "2024-10-10",
+      time: "08:00 AM",
       content: "We are undergoing scheduled maintenance this weekend.",
     },
     {
       title: "Weather Alert",
       date: "2024-10-05",
+      time: "03:00 PM",
       content: "Severe weather warning for your area. Stay safe!",
     },
   ]);
@@ -114,13 +127,16 @@ const Notifications = () => {
   const handleSendNotification = () => {
     const newNotification = {
       title: "New Notification",
-      date: new Date().toLocaleDateString(),
+      date,
+      time,
       content: message,
     };
 
     setNotificationHistory([newNotification, ...notificationHistory]);
     setMessage("");
     setRecipient("");
+    setDate("");
+    setTime("");
     alert("Notification sent successfully!");
   };
 
@@ -130,7 +146,7 @@ const Notifications = () => {
 
       {/* Notification Form */}
       <FormContainer>
-        <Label htmlFor="message">Compose Notification:</Label>
+        <Label htmlFor="message">Description:</Label>
         <TextArea
           id="message"
           value={message}
@@ -148,8 +164,23 @@ const Notifications = () => {
           <option value="All Constituents">All Constituents</option>
           <option value="District Leaders">District Leaders</option>
           <option value="Village Leaders">Village Leaders</option>
-          {/* Add other recipient options as needed */}
         </Select>
+
+        <Label htmlFor="date">Date:</Label>
+        <Input
+          type="date"
+          id="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+
+        <Label htmlFor="time">Time:</Label>
+        <Input
+          type="time"
+          id="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+        />
 
         <Button onClick={handleSendNotification}>Send Notification</Button>
       </FormContainer>
@@ -162,7 +193,9 @@ const Notifications = () => {
             <NotificationCard key={index}>
               <NotificationHeader>
                 <NotificationTitle>{notification.title}</NotificationTitle>
-                <NotificationDate>{notification.date}</NotificationDate>
+                <NotificationDate>
+                  {notification.date} at {notification.time}
+                </NotificationDate>
               </NotificationHeader>
               <NotificationContent>{notification.content}</NotificationContent>
             </NotificationCard>

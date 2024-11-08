@@ -14,6 +14,7 @@ import UpdatePassword from "./screens/updatePassword.js";
 import UpdateLocation from "./screens/updateLocation.js";
 import UpdateUserDetails from "./screens/updateUserDetails.js";
 
+import { ThemeProvider } from "./utils/ThemeContext"; 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -51,32 +52,34 @@ export default function App() {
           component={SecuritySettings}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="ProfileDetails"
-          component={DetailsScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="UpdatePassword"
-          component={UpdatePassword}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="UpdateLocation"
-          component={UpdateLocation}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="UpdateUser"
-          component={UpdateUserDetails}
-          options={{ headerShown: false }}
-        />
+        <ThemeProvider>
+          <Stack.Screen
+            name="ProfileDetails"
+            component={DetailsScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="UpdatePassword"
+            component={UpdatePassword}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="UpdateLocation"
+            component={UpdateLocation}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="UpdateUser"
+            component={UpdateUserDetails}
+            options={{ headerShown: false }}
+          />
 
-        <Stack.Screen
-          name="MainTabs" // This is the stack entry that shows the tabs
-          component={AppTabs}
-          options={{ headerShown: false }}
-        />
+          <Stack.Screen
+            name="MainTabs" // This is the stack entry that shows the tabs
+            component={AppTabs}
+            options={{ headerShown: false }}
+          />
+        </ThemeProvider>
       </Stack.Navigator>
     </NavigationContainer>
   );

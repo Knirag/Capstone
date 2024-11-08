@@ -1,8 +1,9 @@
+// routes/locationRoutes.js
 const express = require("express");
-const { setLocation } = require("../controllers/locationController");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const { getLocations } = require("../controllers/locationController");
 const router = express.Router();
 
-router.post("/set-location", authenticateToken, setLocation);
+// GET /api/locations - Retrieve all locations
+router.get("/", getLocations);
 
 module.exports = router;

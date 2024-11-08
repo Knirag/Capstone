@@ -34,6 +34,8 @@ const styles = StyleSheet.create({
   subtext: {
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
   },
   form: {
     marginVertical: 20,
@@ -94,7 +96,6 @@ const styles = StyleSheet.create({
   touchableArea: {
     paddingHorizontal: 20,
   },
-
 });
 const Loginscreen = () => {
 const [phoneNumber, setPhoneNumber] = useState("");
@@ -128,11 +129,15 @@ const handlePhoneNumberChange = (input) => {
         <Text style={styles.heading}>Sign In to Your Account</Text>
         <View style={styles.subtext}>
           <Text>Don't have an Account?</Text>
-          <TouchableOpacity onPress={navigateToSignup} >
-              <Text
-                style={{ color: Colours.blue, fontWeight: "500", fontSize: 74 }}
-              > Signup
-              </Text>
+          <TouchableOpacity
+            onPress={navigateToSignup}
+            style={{ paddingHorizontal: 10, paddingVertical: 10 }}
+          >
+            <Text
+              style={{ color: Colours.blue, fontWeight: "500", fontSize: 80 }}
+            >
+              Signup Here
+            </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.form}>
@@ -144,7 +149,7 @@ const handlePhoneNumberChange = (input) => {
               keyboardType="numeric"
               value={phoneNumber}
               onChangeText={handlePhoneNumberChange}
-              maxLength={9} 
+              maxLength={9}
             />
           </View>
 

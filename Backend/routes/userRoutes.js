@@ -1,8 +1,9 @@
+// routes/userRoutes.js
 const express = require("express");
-const userController = require("../controllers/userController");
-const authMiddleware = require("../middleware/authMiddleware");
+const { modifyUser } = require("../controllers/userController");
 const router = express.Router();
 
-router.put("/location", authMiddleware, userController.setLocation);
+// PUT /api/users/:id - Update user details
+router.put("/:id", modifyUser);
 
 module.exports = router;
