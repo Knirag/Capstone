@@ -11,8 +11,11 @@ describe("Auth Controller", () => {
       phone_number: "1234567890",
       password: "password123",
     });
+
+    // Check if signup is successful
     expect(response.status).toBe(201);
     expect(response.body.message).toBe("User created successfully");
+    expect(response.body.user).toHaveProperty("id"); // Verify user object has an ID
   });
 
   it("should login an existing user and return a token", async () => {
@@ -20,6 +23,8 @@ describe("Auth Controller", () => {
       username: "testuser",
       password: "password123",
     });
+
+    // Check if login is successful
     expect(response.status).toBe(200);
     expect(response.body.token).toBeDefined();
     token = response.body.token; // Save token for further tests

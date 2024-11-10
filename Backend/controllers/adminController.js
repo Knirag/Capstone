@@ -8,7 +8,7 @@ exports.adminSignup = async (req, res) => {
 
   try {
     const existingAdmin = await getAdminByUsername(username);
-    if (existingAdmin)
+    if (existingAdmin.length > 0)
       return res.status(400).json({ message: "Admin already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,15 +31,16 @@ exports.adminLogin = async (req, res) => {
 
   try {
     const admin = await getAdminByUsername(username);
-    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    if (admin.length === 0)
+      return res.status(404).json({ message: "Admin not found" });
 
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    const isPasswordValid = await bcrypt.compare(password, admin[0].password);
     if (!isPasswordValid)
       return res.status(401).json({ message: "Invalid password" });
 
     // Generate JWT token with role and ID
     const token = jwt.sign(
-      { id: admin.id, role: admin.role, username: admin.username },
+      { id: admin[0].id, role: admin[0].role, username: admin[0].username },
       process.env.JWT_SECRET,
       {
         expiresIn: "1h",

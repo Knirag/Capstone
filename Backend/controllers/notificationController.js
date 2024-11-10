@@ -5,14 +5,21 @@ exports.createNotification = async (req, res) => {
   const createdBy = req.user.id;
 
   try {
-    const result = await pool.query(
+    const [result] = await pool.query(
       `INSERT INTO notifications (title, description, date, location_id, created_by) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+       VALUES (?, ?, ?, ?, ?)`,
       [title, description, date, location_id, createdBy]
     );
+
+    // Fetch the created notification using the `insertId`
+    const [notification] = await pool.query(
+      "SELECT * FROM notifications WHERE id = ?",
+      [result.insertId]
+    );
+
     res
       .status(201)
-      .json({ message: "Notification created", notification: result.rows[0] });
+      .json({ message: "Notification created", notification: notification[0] });
   } catch (error) {
     res.status(500).json({ message: "Error creating notification", error });
   }
@@ -22,11 +29,11 @@ exports.getNotificationsByLocation = async (req, res) => {
   const { location_id } = req.params;
 
   try {
-    const result = await pool.query(
-      "SELECT * FROM notifications WHERE location_id = $1 ORDER BY date DESC",
+    const [result] = await pool.query(
+      "SELECT * FROM notifications WHERE location_id = ? ORDER BY date DESC",
       [location_id]
     );
-    res.status(200).json(result.rows);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "Error retrieving notifications", error });
   }

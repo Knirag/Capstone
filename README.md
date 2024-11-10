@@ -50,14 +50,18 @@ Figma: https://www.figma.com/design/gtIIUeuVkXK11RH1BpDBNS/Citizen-RW-App?node-i
 Login Required to View: https://lucid.app/lucidchart/d3c90593-a0b0-4b18-995a-09a6fd6a5728/edit?viewport_loc=-321%2C-332%2C2956%2C1192%2C0_0&invitationId=inv_514cc1fd-239d-485d-98be-e29a5e671646
 
 
-## Deployment Plan
+## Links: ##
 
-The deployment process for this application consists of three main components: the mobile application, the admin portal website, and the backend. The **mobile application** will be built as an APK file for Android, distributed through Google Play or direct download from a secure server, allowing users easy access to install the app on their devices. The **admin portal** website will be hosted on a cloud service like **Vercel** or **Netlify** for efficient, high-availability access by local government leaders managing user interactions. The **backend API**, responsible for handling data and processing requests, will be deployed on **DigitalOcean**, utilizing a managed PostgreSQL or MySQL database and virtual machine (droplet) for a scalable, secure, and cost-effective solution. This setup ensures reliable data storage, robust performance, and smooth communication between the mobile app, website, and backend API, meeting the needs of end-users and admins alike.
+Video folder: https://drive.google.com/drive/folders/1qrM0deWV9gTBtmSDPAO0rLtFmGgbLNPi?usp=drive_link
+
+Web Portal Link: 
+
+APK Link: 
 
 
-## Video demo(5mins) ##
 
-Initial Prototype: 
+
+
 
 
 

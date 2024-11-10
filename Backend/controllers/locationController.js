@@ -1,13 +1,13 @@
-// controllers/locationController.js
 const pool = require("../config/db");
 
 exports.getLocations = async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM locations ORDER BY district, sector, cell, village, address"
+    const [rows] = await pool.query(
+      "SELECT * FROM locations ORDER BY district, sector, cell, village, Adresss"
     );
-    res.status(200).json(result.rows);
+    res.status(200).json({ locations: rows });
   } catch (error) {
     res.status(500).json({ message: "Error retrieving locations", error });
   }
 };
+

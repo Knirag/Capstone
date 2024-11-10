@@ -1,4 +1,3 @@
-// controllers/userController.js
 const { updateUser } = require("../models/User");
 
 exports.modifyUser = async (req, res) => {
@@ -13,10 +12,12 @@ exports.modifyUser = async (req, res) => {
       age,
       location_id,
     });
+
     res
       .status(200)
       .json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
+    console.error("Error updating user:", error);
     res.status(500).json({ message: "Error updating user", error });
   }
 };
