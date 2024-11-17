@@ -1,15 +1,11 @@
 const express = require("express");
-const {
-  adminSignup,
-  adminLogin,
-  verifyAdminRole,
-} = require("../controllers/adminController");
+const { signup, login } = require("../controllers/adminController");
 const router = express.Router();
 
 // POST /api/admin/signup - Register a new admin
-router.post("/signup", adminSignup);
+router.post("/signup", signup);
 
 // POST /api/admin/login - Admin login
-router.post("/login", adminLogin);
+router.post("/login", login);
 
 module.exports = router;

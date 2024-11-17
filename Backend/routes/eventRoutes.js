@@ -1,14 +1,20 @@
 const express = require("express");
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 const {
   createEvent,
+  updateEvent,
   getEventsByLocation,
 } = require("../controllers/eventController");
+
 const router = express.Router();
 
-// POST /api/events - Create a new event
-router.post("/", createEvent);
+// Admin routes
 
-// GET /api/events/:location_id - Get events for a specific location
+router.post("/", authMiddleware, adminMiddleware, createEvent);
+router.put("/:id", authMiddleware, adminMiddleware, updateEvent);
+
 router.get("/:location_id", getEventsByLocation);
+
 
 module.exports = router;

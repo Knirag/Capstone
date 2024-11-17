@@ -1,46 +1,65 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { createUser, getUserByEmail } = require("../models/User");
-const generateToken = require("../utils/jwtHelper");
+const { getUserByEmail, createUser } = require("../models/User");
+const { generateToken } = require("../utils/jwtHelper");
 
 exports.signup = async (req, res) => {
-  const { names, email, phoneNumber, age, password } = req.body;
+  const {
+    username,
+    email,
+    phone_number,
+    age,
+    password,
+    location_id,
+    home_address,
+  } = req.body;
+
   try {
     const existingUser = await getUserByEmail(email);
-    if (existingUser.length > 0) {
+    console.log("Existing user:", existingUser); // Debug: Check if user already exists
+
+    if (existingUser)
       return res.status(400).json({ message: "User already exists" });
-    }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await createUser({
-      names,
+      username,
       email,
-      phoneNumber,
+      phone_number,
       age,
       password: passwordHash,
+      location_id,
+      home_address,
     });
+    console.log("Created user:", user); // Debug: Confirm user creation
 
-    const token = generateToken(user.id);
+    const token = generateToken({ id: user.id });
+    console.log("Generated token:", token); // Debug: Check if token is generated
     res.status(201).json({ user, token });
   } catch (error) {
+    console.error("Signup error:", error); // Log error for troubleshooting
     res.status(500).json({ message: "Server error", error });
   }
 };
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const user = await getUserByEmail(email);
-    if (user.length === 0)
-      return res.status(404).json({ message: "User not found" });
+    console.log("User fetched in login:", user); // Debug: Confirm user retrieval
 
-    const isMatch = await bcrypt.compare(password, user[0].password);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = generateToken(user[0].id);
-    res.json({ user: user[0], token });
+    // Wrap user.id in an object for generateToken
+    const token = generateToken({ id: user.id });
+    console.log("Generated login token:", token); // Debug: Check if login token is generated
+    res.json({ user, token });
   } catch (error) {
+    console.error("Login error:", error); // Log error for troubleshooting
     res.status(500).json({ message: "Server error", error });
   }
 };

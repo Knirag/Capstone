@@ -8,21 +8,57 @@ const createEvent = async ({
   location_id,
   created_by,
 }) => {
-  const result = await pool.query(
+  const [result] = await pool.query(
     `INSERT INTO events (title, description, event_date, location_id, created_by) 
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+     VALUES (?, ?, ?, ?, ?)`,
     [title, description, event_date, location_id, created_by]
   );
-  return result.rows[0];
+  return result.insertId;
 };
 
 // Get events by location
 const getEventsByLocation = async (location_id) => {
-  const result = await pool.query(
-    "SELECT * FROM events WHERE location_id = $1 ORDER BY event_date DESC",
+  console.log("Querying events for location_id:", location_id); // Debugging
+
+  const [result] = await pool.query(
+    "SELECT * FROM events WHERE location_id = ? ORDER BY event_date DESC",
     [location_id]
   );
-  return result.rows;
+
+  console.log("Query Result:", result); // Debugging
+  return result;
 };
 
-module.exports = { createEvent, getEventsByLocation };
+// Get event by ID
+const getEventById = async (id) => {
+  const [result] = await pool.query("SELECT * FROM events WHERE id = ?", [id]);
+  return result[0];
+};
+
+// Update event by ID
+const updateEvent = async (
+  id,
+  { title, description, event_date, location_id }
+) => {
+  await pool.query(
+    `UPDATE events 
+     SET title = ?, description = ?, event_date = ?, location_id = ? 
+     WHERE id = ?`,
+    [title, description, event_date, location_id, id]
+  );
+  return { id, title, description, event_date, location_id };
+};
+
+// Delete event by ID
+const deleteEvent = async (id) => {
+  await pool.query("DELETE FROM events WHERE id = ?", [id]);
+  return { message: "Event deleted successfully" };
+};
+
+module.exports = {
+  createEvent,
+  getEventsByLocation,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+};

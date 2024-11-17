@@ -1,27 +1,44 @@
 const pool = require("../config/db");
 
-// Retrieve all locations
 const getLocations = async () => {
-  const [rows] = await pool.query(
-    "SELECT * FROM locations ORDER BY district, sector, cell, village, address"
-  );
-  return rows;
-};
-
-// Add new location (optional, if you need to add new locations)
-const addLocation = async ({ district, sector, cell, village, adresss }) => {
   const [result] = await pool.query(
-    `INSERT INTO locations (district, sector, cell, village, adresss) 
-     VALUES (?, ?, ?, ?, ?)`,
-    [district, sector, cell, village, address]
+    "SELECT * FROM locations ORDER BY level, name"
   );
-
-  // Retrieve the newly added location
-  const [locationRows] = await pool.query(
-    "SELECT * FROM locations WHERE id = ?",
-    [result.insertId]
-  );
-  return locationRows[0];
+  return result;
 };
 
-module.exports = { getLocations, addLocation };
+const getLocationById = async (id) => {
+  const [result] = await pool.query("SELECT * FROM locations WHERE id = ?", [
+    id,
+  ]);
+  return result[0];
+};
+
+const addLocation = async ({ name, level, parent_id }) => {
+  const [result] = await pool.query(
+    "INSERT INTO locations (name, level, parent_id) VALUES (?, ?, ?)",
+    [name, level, parent_id]
+  );
+  return { id: result.insertId, name, level, parent_id };
+};
+
+const updateLocation = async (id, { name, level, parent_id }) => {
+  await pool.query(
+    "UPDATE locations SET name = ?, level = ?, parent_id = ? WHERE id = ?",
+    [name, level, parent_id, id]
+  );
+  return { id, name, level, parent_id };
+};
+
+const deleteLocation = async (id) => {
+  const [result] = await pool.query("DELETE FROM locations WHERE id = ?", [id]);
+  return result.affectedRows > 0;
+};
+
+module.exports = {
+  getLocations,
+  getLocationById,
+  addLocation,
+  updateLocation,
+  deleteLocation,
+};

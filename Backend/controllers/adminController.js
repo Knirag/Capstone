@@ -1,15 +1,17 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { getAdminByUsername, createAdmin } = require("../models/Admin");
-require("dotenv").config();
+const bcrypt = require("bcryptjs");
+const { getAdminByEmail, createAdmin } = require("../models/Admin");
+const { generateToken } = require("../utils/jwtHelper");
 
-exports.adminSignup = async (req, res) => {
-  const { username, email, password, role } = req.body;
-
+exports.signup = async (req, res) => {
   try {
-    const existingAdmin = await getAdminByUsername(username);
-    if (existingAdmin.length > 0)
+    const { username, email, password, role, location_id } = req.body;
+
+    console.log("Signup input:", req.body);
+
+    const existingAdmin = await getAdminByEmail(email);
+    if (existingAdmin) {
       return res.status(400).json({ message: "Admin already exists" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newAdmin = await createAdmin({
@@ -17,46 +19,70 @@ exports.adminSignup = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      location_id,
     });
-    res
-      .status(201)
-      .json({ message: "Admin created successfully", admin: newAdmin });
+
+    console.log("New admin created:", newAdmin);
+
+    // Generate token with complete admin data
+    const tokenData = {
+      id: newAdmin.id,
+      role: newAdmin.role,
+      location_id: newAdmin.location_id,
+    };
+
+    console.log("Generating token with data:", tokenData);
+    const token = generateToken(tokenData);
+
+    res.status(201).json({
+      token,
+      admin: {
+        id: newAdmin.id,
+        username: newAdmin.username,
+        email: newAdmin.email,
+        role: newAdmin.role,
+        location_id: newAdmin.location_id,
+      },
+    });
   } catch (error) {
+    console.error("Signup error:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };
 
-exports.adminLogin = async (req, res) => {
-  const { username, password } = req.body;
-
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
   try {
-    const admin = await getAdminByUsername(username);
-    if (admin.length === 0)
-      return res.status(404).json({ message: "Admin not found" });
+    const admin = await getAdminByEmail(email);
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
 
-    const isPasswordValid = await bcrypt.compare(password, admin[0].password);
-    if (!isPasswordValid)
-      return res.status(401).json({ message: "Invalid password" });
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
-    // Generate JWT token with role and ID
-    const token = jwt.sign(
-      { id: admin[0].id, role: admin[0].role, username: admin[0].username },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
-    );
-    res.json({ message: "Login successful", token });
+    // Generate token with complete admin data
+    const tokenData = {
+      id: admin.id,
+      role: admin.role,
+      location_id: admin.location_id,
+    };
+
+    console.log("Generating token with data:", tokenData);
+    const token = generateToken(tokenData);
+
+    // Send response without sensitive data
+    const adminResponse = {
+      id: admin.id,
+      username: admin.username,
+      email: admin.email,
+      role: admin.role,
+      location_id: admin.location_id,
+    };
+
+    res.json({ admin: adminResponse, token });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ message: "Server error", error });
   }
-};
-
-// Middleware to verify admin role
-exports.verifyAdminRole = (req, res, next) => {
-  const { role } = req.user;
-  if (role !== "admin" && role !== "superadmin") {
-    return res.status(403).json({ message: "Access denied: Admins only" });
-  }
-  next();
 };

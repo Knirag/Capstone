@@ -1,4 +1,5 @@
-import React from "react";
+import { useEffect } from "react";
+import messaging from "@react-native-firebase/messaging";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -7,17 +8,24 @@ import Loginscreen from "./screens/loginscreen.js";
 import SignupScreen from "./screens/signupscreen.js";
 import LocationSelector from "./screens/locationselectorscreen.js";
 import OTPScreen from "./screens/OTPScreen.js";
-import AppTabs from "./navigation/TabNavigator"; 
+import AppTabs from "./navigation/TabNavigator";
 import SecuritySettings from "./screens/securityScreen.js";
 import DetailsScreen from "./screens/changeDetailsScreen.js";
 import UpdatePassword from "./screens/updatePassword.js";
 import UpdateLocation from "./screens/updateLocation.js";
 import UpdateUserDetails from "./screens/updateUserDetails.js";
 
-import { ThemeProvider } from "./utils/ThemeContext"; 
+import { ThemeProvider } from "./utils/ThemeContext";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      Alert.alert("New Event Notification", remoteMessage.notification.body);
+    });
+
+    return unsubscribe;
+  }, []);
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Welcome">

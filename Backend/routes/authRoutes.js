@@ -1,12 +1,12 @@
-// routes/authRoutes.js
 const express = require("express");
 const { signup, login } = require("../controllers/authController");
+
 const router = express.Router();
 
-// POST /api/auth/signup - Register a new user
+// Route for user sign-up
 router.post("/signup", signup);
 
-// POST /api/auth/login - Login a user
+// Route for user login
 router.post("/login", login);
 
 module.exports = router;
