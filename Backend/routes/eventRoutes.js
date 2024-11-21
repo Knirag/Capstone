@@ -5,6 +5,7 @@ const {
   createEvent,
   updateEvent,
   getEventsByLocation,
+  getEventById,
 } = require("../controllers/eventController");
 
 const router = express.Router();
@@ -15,6 +16,8 @@ router.post("/", authMiddleware, adminMiddleware, createEvent);
 router.put("/:id", authMiddleware, adminMiddleware, updateEvent);
 
 router.get("/:location_id", getEventsByLocation);
+router.get("/event/:id", authMiddleware, getEventById);
+
 
 
 module.exports = router;

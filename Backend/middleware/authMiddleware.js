@@ -11,13 +11,14 @@ const authMiddleware = (req, res, next) => {
   const token = authHeader.startsWith("Bearer ")
     ? authHeader.slice(7)
     : authHeader;
+
   console.log("Token received in middleware:", token);
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded token payload:", decoded); // Debugging log
     req.user = decoded;
-    console.log("User Role in Middleware:", req.user.role); // Ensure role is included
+    console.log("User attached to request:", req.user); // Log user data
     next();
   } catch (error) {
     console.error("Token verification failed:", error.message);

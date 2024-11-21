@@ -3,12 +3,10 @@ import { View, Image, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import Colours from "../constants/colors";
-// import Loginscreen from "./screens/Login";
 
-// Style Sheets
 const styles = StyleSheet.create({
   container: {
-    dispaly: "flex",
+    display: "flex",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -20,17 +18,16 @@ const styles = StyleSheet.create({
     elevation: 100,
   },
   footer: {
-    zIndex: 100,
-    elevation: 100,
-    position:"absolute",
+    zIndex: 0,
+    position: "absolute",
     top: 200,
-  
+    pointerEvents: "none", // Ensures it doesn't block touches
   },
   buttonContainer: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    margin: "0",
+    margin: 0,
     zIndex: 1,
   },
   gradientButton: {
@@ -46,13 +43,14 @@ const styles = StyleSheet.create({
   },
 });
 
-
 const Languageselect = () => {
-    const navigation = useNavigation(); 
+  const navigation = useNavigation();
 
-    const navigateToLogin = () => {
-      navigation.navigate("Login");
-    };
+  const navigateToLogin = () => {
+    console.log("Navigating to Login...");
+    navigation.navigate("Login");
+  };
+
   return (
     <LinearGradient
       style={{ flex: 1 }}
@@ -73,17 +71,17 @@ const Languageselect = () => {
         <Image source={require("../assets/hands.png")} style={styles.footer} />
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity onPress={() => console.log("Kinyarwanda selected")}>
           <LinearGradient
-            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
+            colors={["#02b4fa", "#1475fc"]}
             style={styles.gradientButton}
           >
             <Text style={styles.buttonText}>Kinyarwanda</Text>
           </LinearGradient>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={navigateToLogin}>
+        <TouchableOpacity onPress={navigateToLogin}>
           <LinearGradient
-            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
+            colors={["#02b4fa", "#1475fc"]}
             style={styles.gradientButton}
           >
             <Text style={styles.buttonText}>English</Text>

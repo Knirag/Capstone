@@ -1,7 +1,6 @@
-import { useEffect } from "react";
-import messaging from "@react-native-firebase/messaging";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import usePushNotifications from "./hooks/usePushNotifications";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Languageselect from "./screens/languageselect.js";
 import Loginscreen from "./screens/loginscreen.js";
@@ -14,18 +13,12 @@ import DetailsScreen from "./screens/changeDetailsScreen.js";
 import UpdatePassword from "./screens/updatePassword.js";
 import UpdateLocation from "./screens/updateLocation.js";
 import UpdateUserDetails from "./screens/updateUserDetails.js";
+import EventDetailScreen from "./screens/EventDetailScreen.js";
 
-import { ThemeProvider } from "./utils/ThemeContext";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert("New Event Notification", remoteMessage.notification.body);
-    });
-
-    return unsubscribe;
-  }, []);
+  const { expoPushToken } = usePushNotifications();
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Welcome">
@@ -60,34 +53,37 @@ export default function App() {
           component={SecuritySettings}
           options={{ headerShown: false }}
         />
-        <ThemeProvider>
-          <Stack.Screen
-            name="ProfileDetails"
-            component={DetailsScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="UpdatePassword"
-            component={UpdatePassword}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="UpdateLocation"
-            component={UpdateLocation}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="UpdateUser"
-            component={UpdateUserDetails}
-            options={{ headerShown: false }}
-          />
+        <Stack.Screen
+          name="ProfileDetails"
+          component={DetailsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UpdatePassword"
+          component={UpdatePassword}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UpdateLocation"
+          component={UpdateLocation}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UpdateUser"
+          component={UpdateUserDetails}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EventDetails"
+          component={EventDetailScreen}
+          options={{ headerShown: false }}
+        />
 
-          <Stack.Screen
-            name="MainTabs" // This is the stack entry that shows the tabs
-            component={AppTabs}
-            options={{ headerShown: false }}
-          />
-        </ThemeProvider>
+        <Stack.Screen
+          name="MainTabs"
+          component={AppTabs}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

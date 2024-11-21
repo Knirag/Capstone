@@ -25,7 +25,7 @@ const UpdateUserDetails = () => {
         <Icon name="chevron-back-sharp" style={styles.back} size={24} />
       </TouchableOpacity>
 
-      <Text style={styles.headerText}>Update Your Password</Text>
+      <Text style={styles.headerText}>Update Your Phone Number</Text>
       <View style={styles.fieldContainer}>
         {/* Current Phone Number */}
         <Text style={styles.label}>Current Phone Number:</Text>
@@ -67,7 +67,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: Colours.darkgray,
-    marginTop: -33,
+    marginTop: -30,
+    marginLeft:30,
     zIndex: 5,
     alignSelf: "center",
   },

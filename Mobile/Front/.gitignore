@@ -34,3 +34,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 Backend/*.json
+
+
+utils.js

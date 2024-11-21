@@ -17,12 +17,16 @@ const PageContainer = styled.div`
   padding: 20px;
   max-width: 1200px;
   margin: auto;
+  background-color: ${Colours.lightgray};
+  border-radius: 8px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 `;
 
 const Header = styled.h1`
   font-size: 2rem;
   font-weight: bold;
   color: ${Colours.darkgray};
+  text-align: center;
   margin-bottom: 20px;
 `;
 
@@ -33,26 +37,33 @@ const FilterContainer = styled.div`
   margin-bottom: 20px;
 `;
 
+const Label = styled.label`
+  font-size: 1rem;
+  font-weight: bold;
+  color: ${Colours.darkgray};
+`;
+
 const Select = styled.select`
   padding: 8px;
   border-radius: 5px;
   border: 1px solid ${Colours.lightgray};
   margin-left: 10px;
+  font-size: 1rem;
 `;
 
 const StatContainer = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
+  gap: 15px;
 `;
 
 const StatCard = styled.div`
   flex: 1;
   padding: 20px;
-  background-color: ${Colours.lightgray};
+  background-color: #fff;
   border-radius: 8px;
   text-align: center;
-  margin: 0 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
@@ -64,28 +75,57 @@ const StatTitle = styled.h3`
 const StatValue = styled.p`
   font-size: 1.5rem;
   color: ${Colours.blue};
+  font-weight: bold;
 `;
 
 const ChartContainer = styled.div`
   display: flex;
   justify-content: space-around;
   margin-top: 20px;
+  gap: 20px;
+`;
+
+const ChartWrapper = styled.div`
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const ChartTitle = styled.h3`
+  font-size: 1.2rem;
+  color: ${Colours.darkgray};
+  margin-bottom: 10px;
+  text-align: center;
 `;
 
 const Analytics = () => {
   const [dateRange, setDateRange] = useState("Monthly");
 
   // Mock data for charts
-  const constituentData = [
-    { name: "Week 1", constituents: 40 },
-    { name: "Week 2", constituents: 50 },
-    { name: "Week 3", constituents: 45 },
-    { name: "Week 4", constituents: 60 },
-  ];
+  const constituentData = {
+    Monthly: [
+      { name: "October", constituents: 3 },
+      { name: "November", constituents: 11 },
+    ],
+    Weekly: [
+      { name: "Week 1", constituents: 50 },
+      { name: "Week 2", constituents: 60 },
+      { name: "Week 3", constituents: 45 },
+      { name: "Week 4", constituents: 70 },
+    ],
+    Daily: [
+      { name: "Day 1", constituents: 10 },
+      { name: "Day 2", constituents: 15 },
+      { name: "Day 3", constituents: 12 },
+      { name: "Day 4", constituents: 18 },
+    ],
+  };
 
   const notificationData = [
-    { name: "Read", value: 400 },
-    { name: "Unread", value: 200 },
+    { name: "Read", value: 7 },
+    { name: "Unread", value: 3 },
   ];
 
   const handleDateRangeChange = (event) => {
@@ -98,7 +138,7 @@ const Analytics = () => {
 
       {/* Filter */}
       <FilterContainer>
-        <label htmlFor="date-range">Date Range:</label>
+        <Label htmlFor="date-range">Date Range:</Label>
         <Select
           id="date-range"
           value={dateRange}
@@ -114,24 +154,23 @@ const Analytics = () => {
       <StatContainer>
         <StatCard>
           <StatTitle>Total Constituents</StatTitle>
-          <StatValue>1,240</StatValue>
+          <StatValue>14</StatValue>
         </StatCard>
         <StatCard>
           <StatTitle>Notifications Sent</StatTitle>
-          <StatValue>320</StatValue>
+          <StatValue>10</StatValue>
         </StatCard>
         <StatCard>
           <StatTitle>Engagement Rate</StatTitle>
-          <StatValue>65%</StatValue>
+          <StatValue>85%</StatValue>
         </StatCard>
       </StatContainer>
 
       {/* Charts */}
       <ChartContainer>
-        {/* Line Chart - New Constituents Over Time */}
-        <div>
-          <h3>Constituent Growth</h3>
-          <LineChart width={400} height={300} data={constituentData}>
+        <ChartWrapper>
+          <ChartTitle>Constituent Growth</ChartTitle>
+          <LineChart width={400} height={300} data={constituentData[dateRange]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
@@ -143,11 +182,10 @@ const Analytics = () => {
               stroke={Colours.blue}
             />
           </LineChart>
-        </div>
+        </ChartWrapper>
 
-        {/* Pie Chart - Notification Engagement */}
-        <div>
-          <h3>Notification Engagement</h3>
+        <ChartWrapper>
+          <ChartTitle>Notification Engagement</ChartTitle>
           <PieChart width={300} height={300}>
             <Pie
               dataKey="value"
@@ -161,7 +199,7 @@ const Analytics = () => {
             />
             <Tooltip />
           </PieChart>
-        </div>
+        </ChartWrapper>
       </ChartContainer>
     </PageContainer>
   );

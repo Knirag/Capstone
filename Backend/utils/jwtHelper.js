@@ -8,7 +8,7 @@ const generateToken = (userData) => {
     throw new Error("Invalid payload: generateToken expects an object");
   }
   console.log("Generating JWT with payload:", userData);
-  return jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
 

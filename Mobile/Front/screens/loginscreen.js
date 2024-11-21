@@ -5,12 +5,107 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  ScrollView,
   TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
-import Colours from "../constants/colors";
 import Icon from "react-native-vector-icons/Ionicons";
+import Colours from "../constants/colors";
+
+const Loginscreen = () => {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [secureText, setSecureText] = useState(true);
+
+  const toggleSecureText = () => {
+    setSecureText(!secureText);
+  };
+
+  const handlePhoneNumberChange = (input) => {
+    const formattedInput = input.replace(/^0+/, ""); // Removes leading 0s
+    if (formattedInput.length <= 9) {
+      setPhoneNumber(formattedInput);
+    }
+  };
+
+  const navigation = useNavigation();
+
+  const navigateToSignup = () => {
+  console.log("Navigating to Signup button works ...");
+    navigation.navigate("Signup");
+  };
+
+  return (
+    <LinearGradient
+      style={{ flex: 1 }}
+      colors={[Colours.primary, Colours.secondary]}
+    >
+      <View style={styles.container}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <Text style={styles.heading}>Sign In to Your Account</Text>
+        <View style={styles.subtext}>
+          <Text>Don't have an Account?</Text>
+          <TouchableOpacity
+            onPress={navigateToSignup}
+            style={styles.touchableArea}
+            hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }} 
+          >
+            <Text
+              style={{ color: Colours.blue, fontWeight: "500", fontSize: 16 }}
+            >
+              Signup Here
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.countryCode}>+250</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              keyboardType="numeric"
+              value={phoneNumber}
+              onChangeText={handlePhoneNumberChange}
+              maxLength={9}
+            />
+          </View>
+
+          {/* Password Field */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry={secureText}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={toggleSecureText}>
+              <Icon
+                name={secureText ? "eye-off" : "eye"}
+                size={24}
+                color={Colours.darkgray}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.button}>
+          <LinearGradient
+            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
+            style={styles.gradientButton}
+          >
+            <Text style={styles.buttonText}>Login</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+  );
+};
+
+export default Loginscreen;
+
 const styles = StyleSheet.create({
   container: {
     display: "flex",
@@ -32,7 +127,6 @@ const styles = StyleSheet.create({
     marginTop: -90,
   },
   subtext: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
@@ -89,100 +183,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colours.white,
     fontSize: 18,
-    fontWeight: "light",
+    fontWeight: "500",
     textTransform: "uppercase",
-    fontWeight: "medium",
   },
   touchableArea: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10, // Expand horizontally
+    paddingVertical: 10, // Expand vertically
   },
 });
-const Loginscreen = () => {
-const [phoneNumber, setPhoneNumber] = useState("");
-const [password, setPassword] = useState("");
-const [secureText, setSecureText] = useState(true);
-
-const toggleSecureText = () => {
-  setSecureText(!secureText);
-};
-
-const handlePhoneNumberChange = (input) => {
-  // Remove leading zero and limit input to 9 digits
-  const formattedInput = input.replace(/^0+/, ""); // Removes leading 0s
-  if (formattedInput.length <= 9) {
-    setPhoneNumber(formattedInput);
-  }
-};
-  const navigation = useNavigation(); 
-
-  const navigateToSignup = () => {
-    navigation.navigate("Signup"); 
-  };
-
-  return (
-    <LinearGradient
-      style={{ flex: 1 }}
-      colors={[Colours.primary, Colours.secondary]}
-    >
-      <View style={styles.container}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.heading}>Sign In to Your Account</Text>
-        <View style={styles.subtext}>
-          <Text>Don't have an Account?</Text>
-          <TouchableOpacity
-            onPress={navigateToSignup}
-            style={{ paddingHorizontal: 10, paddingVertical: 10 }}
-          >
-            <Text
-              style={{ color: Colours.blue, fontWeight: "500", fontSize: 80 }}
-            >
-              Signup Here
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.countryCode}>+250</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              keyboardType="numeric"
-              value={phoneNumber}
-              onChangeText={handlePhoneNumberChange}
-              maxLength={9}
-            />
-          </View>
-
-          {/* Password Field */}
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              secureTextEntry={secureText}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={toggleSecureText}>
-              <Icon
-                name={secureText ? "eye-off" : "eye"}
-                size={24}
-                color={Colours.darkgray}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.button}>
-          <LinearGradient
-            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
-            style={styles.gradientButton}
-          >
-            <Text style={styles.buttonText}>Login</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-  );
-};
-
-export default Loginscreen;

@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
 import Colours from "../../assets/Colours/Colours";
-
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -18,6 +16,7 @@ const Header = styled.h1`
 `;
 
 const SearchFilterContainer = styled.div`
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,10 +31,9 @@ const SearchInput = styled.input`
 `;
 
 const FilterSelect = styled.select`
-  padding: 8px;
+  padding: 10px;
   border-radius: 5px;
   border: 1px solid ${Colours.lightgray};
-  margin: 0 10px;
 `;
 
 const ConstituentList = styled.div`
@@ -50,7 +48,6 @@ const ConstituentCard = styled.div`
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
-  position: relative;
 `;
 
 const CardTitle = styled.h3`
@@ -81,42 +78,93 @@ const ActionButton = styled.button`
   }
 `;
 
-const AddButton = styled(Link)`
-  background: ${Colours.green};
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+`;
+
+const ModalButton = styled.button`
+  background: ${(props) => (props.danger ? Colours.red : Colours.blue)};
   color: #fff;
   padding: 10px 20px;
+  border: none;
   border-radius: 5px;
-  text-decoration: none;
-  font-weight: bold;
+  margin: 5px;
+  cursor: pointer;
   &:hover {
-    background: ${Colours.darkgreen};
+    background: ${(props) =>
+      props.danger ? Colours.darkred : Colours.darkblue};
   }
 `;
 
 const Constituents = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [district, setDistrict] = useState("");
-  const [sector, setSector] = useState("");
-  const [cell, setCell] = useState("");
   const [village, setVillage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [selectedConstituent, setSelectedConstituent] = useState(null);
+  const [updatedLocation, setUpdatedLocation] = useState("");
 
-  // Example data for demonstration
   const constituents = [
     {
       id: 1,
-      name: "John Doe",
-      age: 32,
-      contact: "123456789",
+      name: "Jean Claude",
+      age: 23,
+      contact: "0781234567",
       village: "Rebero",
     },
     {
       id: 2,
-      name: "Jane Smith",
-      age: 28,
-      contact: "987654321",
-      village: "Rutsiro",
+      name: "Aline Mukamana",
+      age: 22,
+      contact: "0782345678",
+      village: "Ubumwe",
     },
-    // More data...
+    {
+      id: 3,
+      name: "Eric Ndayisenga",
+      age: 19,
+      contact: "0783456789",
+      village: "Rutsiro I",
+    },
+    {
+      id: 4,
+      name: "Mugisha Thierry",
+      age: 22,
+      contact: "0784567890",
+      village: "Rutsiro II",
+    },
+    {
+      id: 5,
+      name: "Ariane Uwase",
+      age: 22,
+      contact: "0785678901",
+      village: "Rebero",
+    },
+    {
+      id: 6,
+      name: "Didier Nsengimana",
+      age: 27,
+      contact: "0786789012",
+      village: "Ubumwe",
+    },
   ];
 
   const handleSearch = (event) => {
@@ -126,6 +174,37 @@ const Constituents = () => {
   const filteredConstituents = constituents.filter((constituent) =>
     constituent.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const openModal = (constituent) => {
+    setSelectedConstituent(constituent);
+    setUpdatedLocation(constituent.village);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedConstituent(null);
+  };
+
+  const openDeletePopup = (constituent) => {
+    setSelectedConstituent(constituent);
+    setIsDeletePopupOpen(true);
+  };
+
+  const closeDeletePopup = () => {
+    setIsDeletePopupOpen(false);
+    setSelectedConstituent(null);
+  };
+
+  const handleUpdateLocation = () => {
+    console.log(`Updated location: ${updatedLocation}`);
+    closeModal();
+  };
+
+  const handleDeleteConstituent = () => {
+    console.log(`Deleted constituent: ${selectedConstituent.name}`);
+    closeDeletePopup();
+  };
 
   return (
     <PageContainer>
@@ -138,43 +217,16 @@ const Constituents = () => {
           value={searchTerm}
           onChange={handleSearch}
         />
-
-        <div>
-          <FilterSelect
-            value={district}
-            onChange={(e) => setDistrict(e.target.value)}
-          >
-            <option value="">Select District</option>
-            <option value="Gasabo">Gasabo</option>
-            {/* More districts */}
-          </FilterSelect>
-
-          <FilterSelect
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-          >
-            <option value="">Select Sector</option>
-            <option value="Remera">Remera</option>
-            {/* More sectors */}
-          </FilterSelect>
-
-          <FilterSelect value={cell} onChange={(e) => setCell(e.target.value)}>
-            <option value="">Select Cell</option>
-            <option value="Rukiri II">Rukiri II</option>
-            {/* More cells */}
-          </FilterSelect>
-
-          <FilterSelect
-            value={village}
-            onChange={(e) => setVillage(e.target.value)}
-          >
-            <option value="">Select Village</option>
-            <option value="Rebero">Rebero</option>
-            {/* More villages */}
-          </FilterSelect>
-        </div>
-
-        <AddButton to="/add-constituent">Add New Constituent</AddButton>
+        <FilterSelect
+          value={village}
+          onChange={(e) => setVillage(e.target.value)}
+        >
+          <option value="">Select Village</option>
+          <option value="Rebero">Rebero</option>
+          <option value="Ubumwe">Ubumwe</option>
+          <option value="Rutsiro I">Rutsiro I</option>
+          <option value="Rutsiro II">Rutsiro II</option>
+        </FilterSelect>
       </SearchFilterContainer>
 
       <ConstituentList>
@@ -186,12 +238,51 @@ const Constituents = () => {
             <CardText>Village: {constituent.village}</CardText>
 
             <ButtonContainer>
-              <ActionButton>View Details</ActionButton>
-              <ActionButton>Send Notification</ActionButton>
+              <ActionButton onClick={() => openModal(constituent)}>
+                Edit
+              </ActionButton>
+              <ActionButton onClick={() => openDeletePopup(constituent)}>
+                Delete
+              </ActionButton>
             </ButtonContainer>
           </ConstituentCard>
         ))}
       </ConstituentList>
+
+      {isModalOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <h3>Edit Location</h3>
+            <p>{selectedConstituent.name}</p>
+            <FilterSelect
+              value={updatedLocation}
+              onChange={(e) => setUpdatedLocation(e.target.value)}
+            >
+              <option value="Rebero">Rebero</option>
+              <option value="Ubumwe">Ubumwe</option>
+              <option value="Rutsiro I">Rutsiro I</option>
+              <option value="Rutsiro II">Rutsiro II</option>
+            </FilterSelect>
+            <ModalButton onClick={handleUpdateLocation}>Update</ModalButton>
+            <ModalButton danger onClick={closeModal}>
+              Cancel
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {isDeletePopupOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <h3>Are you sure you want to delete?</h3>
+            <p>{selectedConstituent.name}</p>
+            <ModalButton onClick={handleDeleteConstituent}>Yes</ModalButton>
+            <ModalButton danger onClick={closeDeletePopup}>
+              No
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </PageContainer>
   );
 };

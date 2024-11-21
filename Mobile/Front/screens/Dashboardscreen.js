@@ -123,8 +123,13 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
 });
+
 const Dashboardscreen = () => {
-  
+  const navigation = useNavigation();
+
+  const navigateToEvent = () => {
+    navigation.navigate("EventDetails");
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -156,7 +161,7 @@ const Dashboardscreen = () => {
         </View>
         <View style={styles.week}>
           <Text style={styles.durationlabel}>Next Week</Text>
-          <TouchableOpacity style={styles.event}>
+          <TouchableOpacity style={styles.event} onPress={navigateToEvent}>
             <View style={styles.eventDetails}>
               <Text style={styles.eventTitle}>Event Title</Text>
               <View style={styles.eventRow}>
@@ -170,7 +175,7 @@ const Dashboardscreen = () => {
             </View>
           </TouchableOpacity>
         </View>
-              </ScrollView>
+      </ScrollView>
       </View>
     </View>
   );

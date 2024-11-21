@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, Button, Image, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -181,7 +181,7 @@ const LocationSelector = () => {
         {/* Submit Button */}
         <TouchableOpacity style={styles.button} onPress={navigateToOTP}>
           <LinearGradient
-            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
+            colors={["#02b4fa", "#1475fc"]} 
             style={styles.gradientButton}
           >
             <Text style={styles.buttonText}>Signup</Text>

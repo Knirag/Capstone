@@ -4,6 +4,7 @@ const Colours = {
   skyblue: "#68e4fc",
   babyblue: " #ccecff",
   blue: "#0796d9",
+  gold: "#f2e202",
   black: "#030000",
   primary: "#89e3fa",
   secondary: "#ffffff",

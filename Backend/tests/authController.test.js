@@ -12,7 +12,7 @@ describe("Auth Controller", () => {
       email: "testuser@example.com",
       phone_number: "1234567890",
       password: "password123",
-      location_id: 1, // Ensure this location ID exists in the database
+      location_id: 1,
     });
   });
 
@@ -25,7 +25,7 @@ describe("Auth Controller", () => {
     // Validate the login response
     expect(response.status).toBe(200);
     expect(response.body.token).toBeDefined();
-    token = response.body.token; // Save token for further tests if needed
+    token = response.body.token; 
   });
   afterAll(async () => {
     if (pool) await pool.end(); 

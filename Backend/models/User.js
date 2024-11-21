@@ -8,6 +8,7 @@ const getUserByEmail = async (email) => {
   return result[0];
 };
 
+
 // Create a new user
 const createUser = async ({
   username,
@@ -40,4 +41,37 @@ const updateUser = async (
   return { id, username, email, phone_number, age, location_id, home_address };
 };
 
-module.exports = { getUserByEmail, createUser, updateUser };
+const updateUserPushToken = async (userId, push_token) => {
+  await pool.query("UPDATE users SET push_token = ? WHERE id = ?", [
+    push_token,
+    userId,
+  ]);
+};
+const getUsersByLocation = async (locationId) => {
+  const query = `
+    WITH RECURSIVE LocationHierarchy AS (
+      SELECT id
+      FROM locations
+      WHERE id = ?
+      UNION ALL
+      SELECT l.id
+      FROM locations l
+      INNER JOIN LocationHierarchy lh ON lh.id = l.parent_id
+    )
+    SELECT u.id, u.push_token
+    FROM users u
+    JOIN LocationHierarchy lh ON u.location_id = lh.id;
+  `;
+
+  const [users] = await pool.query(query, [locationId]);
+  return users;
+};
+
+
+module.exports = {
+  getUserByEmail,
+  createUser,
+  updateUser,
+  updateUserPushToken,
+  getUsersByLocation,
+};

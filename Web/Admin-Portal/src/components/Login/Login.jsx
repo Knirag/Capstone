@@ -132,7 +132,7 @@ const ToggleLink = styled.p`
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loginFormData, setLoginFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
   const [signupFormData, setSignupFormData] = useState({
@@ -176,10 +176,10 @@ const LoginPage = () => {
         {isLogin ? (
           <form>
             <InputField>
-              <Label>Username</Label>
+              <Label>Email</Label>
               <Input
-                type="text"
-                name="username"
+                type="email"
+                name="email"
                 value={loginFormData.username}
                 onChange={(e) => handleInputChange(e, "login")}
               />
@@ -223,12 +223,24 @@ const LoginPage = () => {
             </InputField>
             <InputField>
               <Label>Role</Label>
-              <Input
-                type="text"
+              <select
                 name="role"
                 value={signupFormData.role}
                 onChange={(e) => handleInputChange(e, "signup")}
-              />
+                style={{
+                  width: "100%",
+                  padding: "0.9rem",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  fontSize: "1rem",
+                  color: "#333",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <option value="">Select Role</option>
+                <option value="cellLeader">Cell Leader</option>
+                <option value="villageLeader">Village Leader</option>
+              </select>
             </InputField>
             <InputField>
               <Label>Password</Label>

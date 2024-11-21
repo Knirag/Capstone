@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 dotenv.config(); 
 
 // console.log("Environment variables loaded successfully:");
@@ -16,9 +16,10 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT || 3306,
+  charset: "utf8mb4",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
-module.exports = pool.promise();
+module.exports = pool;

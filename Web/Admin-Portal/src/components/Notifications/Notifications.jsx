@@ -9,77 +9,113 @@ const PageContainer = styled.div`
 `;
 
 const Header = styled.h1`
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: bold;
   color: ${Colours.darkgray};
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  text-align: center;
 `;
 
 const FormContainer = styled.div`
   background: ${Colours.lightgray};
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 `;
 
 const Label = styled.label`
   font-size: 1rem;
   color: ${Colours.darkgray};
   margin-bottom: 8px;
+  display: block;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 1rem;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 1px solid ${Colours.lightgray};
   margin-bottom: 20px;
+  &:focus {
+    outline: none;
+    border-color: ${Colours.blue};
+    box-shadow: 0 0 6px rgba(102, 166, 255, 0.3);
+  }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  height: 100px;
-  padding: 10px;
+  height: 120px;
+  padding: 12px;
   font-size: 1rem;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 1px solid ${Colours.lightgray};
   margin-bottom: 20px;
   resize: none;
+  &:focus {
+    outline: none;
+    border-color: ${Colours.blue};
+    box-shadow: 0 0 6px rgba(102, 166, 255, 0.3);
+  }
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
   border: 1px solid ${Colours.lightgray};
   margin-bottom: 20px;
+  &:focus {
+    outline: none;
+    border-color: ${Colours.blue};
+    box-shadow: 0 0 6px rgba(102, 166, 255, 0.3);
+  }
 `;
 
 const Button = styled.button`
   background: ${Colours.blue};
   color: #fff;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
   &:hover {
     background: ${Colours.darkblue};
+    box-shadow: 0 4px 10px rgba(85, 139, 211, 0.4);
   }
 `;
 
 const HistoryContainer = styled.div`
-  margin-top: 20px;
+  margin-top: 30px;
+`;
+
+const HistoryHeader = styled.h2`
+  font-size: 1.5rem;
+  color: ${Colours.darkgray};
+  margin-bottom: 15px;
+  text-align: center;
+  position: relative;
+  &::after {
+    content: "";
+    display: block;
+    width: 50%;
+    height: 2px;
+    background: ${Colours.lightgray};
+    margin: 10px auto 0;
+  }
 `;
 
 const NotificationCard = styled.div`
   background: ${Colours.white};
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const NotificationHeader = styled.div`
@@ -90,6 +126,7 @@ const NotificationHeader = styled.div`
 
 const NotificationTitle = styled.h3`
   font-size: 1.1rem;
+  font-weight: bold;
   color: ${Colours.darkgray};
 `;
 
@@ -100,8 +137,8 @@ const NotificationDate = styled.span`
 
 const NotificationContent = styled.p`
   color: ${Colours.gray};
-  font-size: 0.95rem;
-  margin-top: 5px;
+  font-size: 1rem;
+  margin-top: 10px;
 `;
 
 const Notifications = () => {
@@ -187,7 +224,7 @@ const Notifications = () => {
 
       {/* Notification History */}
       <HistoryContainer>
-        <h2>Sent Notifications</h2>
+        <HistoryHeader>Sent Notifications</HistoryHeader>
         {notificationHistory.length > 0 ? (
           notificationHistory.map((notification, index) => (
             <NotificationCard key={index}>

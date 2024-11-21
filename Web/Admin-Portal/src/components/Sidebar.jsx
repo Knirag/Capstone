@@ -41,7 +41,7 @@ const LogoutButton = styled.div`
 `;
 
 const SidebarNav = styled.nav`
-  background: ${Colours.lightgray};
+  background: ${Colours.white};
   margin-top: 70px;
   width: 250px;
   height: 100vh;

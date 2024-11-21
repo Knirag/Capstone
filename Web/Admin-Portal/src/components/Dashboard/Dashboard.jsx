@@ -103,7 +103,7 @@ const Dashboard = () => {
             <RiIcons.RiGroupLine />
           </FadedIcon>
           <h3>Constituents</h3>
-          <p>1234 Constituents</p>
+          <p>14 Constituents</p>
           <Link
             to="/constituent-management"
             style={{ color: "#fff", textDecoration: "underline" }}
@@ -116,7 +116,7 @@ const Dashboard = () => {
             <FaIcons.FaBell />
           </FadedIcon>
           <h3>Active Notifications</h3>
-          <p>56 Notifications</p>
+          <p>10 Notifications</p>
           <Link
             to="/notification-center"
             style={{ color: "#fff", textDecoration: "underline" }}
@@ -129,7 +129,7 @@ const Dashboard = () => {
             <IoIcons.IoIosCheckmarkCircleOutline />
           </FadedIcon>
           <h3>Confirmations Received</h3>
-          <p>89 Confirmations</p>
+          <p>6 Confirmations</p>
         </Card>
       </TopRow>
 
@@ -152,7 +152,7 @@ const Dashboard = () => {
           </IconWrapper>
           <h4>Support & Feedback</h4>
         </LinkCard>
-        <LinkCard to="/analytics">
+        <LinkCard to="/constituent-analytics">
           <IconWrapper>
             <FaIcons.FaChartLine />
           </IconWrapper>

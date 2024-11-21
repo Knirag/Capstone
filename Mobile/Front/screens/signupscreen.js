@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   form: {
     width: "100%",
-    dispaly: "flex",
+    display: "flex",
     flexDirection: "column",
     padding: 15,
   },
@@ -142,7 +142,7 @@ const SignupScreen = () => {
     >
         <View style={styles.container}>
           <Image source={require("../assets/logo.png")} style={styles.logo} />
-          <Text style={styles.heading}>Sign In to Your Account</Text>
+          <Text style={styles.heading}>Create Your Account</Text>
           <View style={styles.subtext}>
             <Text>Already have an Account?</Text>
             <TouchableOpacity onPress={navigateToLogin}>

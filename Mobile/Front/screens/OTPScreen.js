@@ -1,4 +1,4 @@
-import react, {useState} from 'react'
+import React, { useState, useEffect } from "react";
 import {
   View,
   Image,
@@ -81,27 +81,32 @@ const styles = StyleSheet.create({
   },
 });
 const OTPScreen = () => {
-    const [otp, setOtp] = useState(["", "", "", ""]); // Four fields for OTP
+  const [otp, setOtp] = useState(["", "", "", ""]); // Four fields for OTP
+  const navigation = useNavigation();
 
-    const handleOtpChange = (value, index) => {
-      const otpArray = [...otp];
-      otpArray[index] = value;
-      setOtp(otpArray);
-    };
+  // This side effect ensures navigation happens after rendering
+  useEffect(() => {
+    // Uncomment this if you need automatic redirection logic
+    // navigation.replace("MainTabs");
+  }, []); // Empty dependency array ensures this runs once when the component mounts
 
-    const handleSubmit = () => {
-      const otpValue = otp.join("");
-      console.log("OTP entered:", otpValue);
-      // You can add OTP verification logic here
-      // After successful verification, navigate to the next screen
-      navigation.navigate("NextScreen"); // Replace 'NextScreen' with your screen
-    };
-    const navigation = useNavigation();
+  const handleOtpChange = (value, index) => {
+    const otpArray = [...otp];
+    otpArray[index] = value;
+    setOtp(otpArray);
+  };
 
-    const navigateToDashboard = () => {
-      navigation.navigate("Dashboard");
-    };
-    navigation.replace("MainTabs");
+  // const handleSubmit = () => {
+  //   const otpValue = otp.join("");
+  //   console.log("OTP entered:", otpValue);
+  //   // Add OTP verification logic here
+  //   navigation.navigate("Dashboard"); 
+  // };
+
+  const navigateToDashboard = () => {
+     navigation.replace("MainTabs");
+  };
+
   return (
     <LinearGradient
       style={{ flex: 1 }}
@@ -147,6 +152,6 @@ const OTPScreen = () => {
       </TouchableOpacity>
     </LinearGradient>
   );
-}
+};
 
 export default OTPScreen;

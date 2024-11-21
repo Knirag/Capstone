@@ -39,24 +39,37 @@ describe("Event Controller", () => {
     }
   });
 
-  it("should create a new event", async () => {
-    const eventData = {
-      title: "Test Event",
-      description: "This is a test event",
-      event_date: "2024-12-01 15:00:00",
-      location_id: 1,
-    };
+it("should create a new event and send push notifications", async () => {
+  // Step 1: Store the push token for the user
+  const pushTokenResponse = await request(app)
+    .post("/api/users/push-token")
+    .set("Authorization", `Bearer ${token}`)
+    .send({ push_token: "ExponentPushToken[valid_token_here]" });
 
-    console.log("Attempting to create event with token:", token);
-    const response = await request(app)
-      .post("/api/events")
-      .set("Authorization", `Bearer ${token}`)
-      .send(eventData);
+  console.log("Store Push Token Response:", pushTokenResponse.body);
+  expect(pushTokenResponse.status).toBe(200);
+  expect(pushTokenResponse.body.message).toBe(
+    "Push token stored successfully."
+  );
 
-    console.log("Create Event API Response:", response.body);
-    expect(response.status).toBe(201);
-    expect(response.body.message).toBe("Event created successfully");
-  });
+  // Step 2: Create a new event
+  console.log("Attempting to create event with token:", token);
+  const eventData = {
+    title: "Test Event",
+    description: "This is a test event",
+    event_date: "2024-12-02 15:00:00",
+    location_id: 1,
+  };
+
+  const response = await request(app)
+    .post("/api/events")
+    .set("Authorization", `Bearer ${token}`)
+    .send(eventData);
+
+  console.log("Create Event API Response:", response.body);
+  expect(response.status).toBe(201);
+  expect(response.body.message).toBe("Event created and notifications sent."); // Adjusted message
+});
 
   it("should retrieve events by location", async () => {
     // Create an event first
@@ -66,7 +79,7 @@ describe("Event Controller", () => {
       .send({
         title: "Test Event for Retrieval",
         description: "This is another test event",
-        event_date: "2024-12-02T15:00:00Z",
+        event_date: "2024-12-02 13:00:00",
         location_id: 1,
       });
 

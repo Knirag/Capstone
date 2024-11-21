@@ -13,7 +13,7 @@ const createEvent = async ({
      VALUES (?, ?, ?, ?, ?)`,
     [title, description, event_date, location_id, created_by]
   );
-  return result.insertId;
+  return result.insertId; // Return the inserted event ID
 };
 
 // Get events by location
@@ -31,9 +31,15 @@ const getEventsByLocation = async (location_id) => {
 
 // Get event by ID
 const getEventById = async (id) => {
+  console.log("Querying database for event ID:", id); // Log the query input
+
   const [result] = await pool.query("SELECT * FROM events WHERE id = ?", [id]);
-  return result[0];
+  console.log("Query result:", result); // Log the query output
+
+  return result[0]; // Return the first result
 };
+
+
 
 // Update event by ID
 const updateEvent = async (

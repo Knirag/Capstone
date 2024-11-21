@@ -1,18 +1,16 @@
 const express = require("express");
+const router = express.Router();
 const {
   createSupportTicket,
   updateSupportTicket,
   getSupportTicket,
   getAllSupportTickets,
 } = require("../controllers/supportController");
-const { authenticateAdmin } = require("../middleware/authMiddleware");
-
-const router = express.Router();
-
-// Routes
-router.post("/", authenticateAdmin, createSupportTicket); // Create support ticket
-router.put("/:id", authenticateAdmin, updateSupportTicket); // Update support ticket
-router.get("/:id", authenticateAdmin, getSupportTicket); // View specific support ticket
-router.get("/", authenticateAdmin, getAllSupportTickets); // View all support tickets
+const adminMiddleware = require("../middleware/adminMiddleware");
+router.post("/", adminMiddleware, createSupportTicket);
+router.put("/:id", adminMiddleware, updateSupportTicket);
+router.get("/:id", adminMiddleware, getSupportTicket);
+router.get("/", adminMiddleware, getAllSupportTickets);
+console.log("createSupportTicket:", createSupportTicket);
 
 module.exports = router;

@@ -4,16 +4,15 @@ const {
   getFeedback,
   getAllFeedback,
 } = require("../controllers/feedbackController");
-const {
-  authenticateUser,
-  authenticateAdmin,
-} = require("../middleware/authMiddleware");
+const  authMiddleware  = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
+
 
 const router = express.Router();
 
 // Routes
-router.post("/", authenticateUser, addFeedback); // Users submit feedback
-router.get("/:id", authenticateAdmin, getFeedback); // Admin views specific feedback
-router.get("/", authenticateAdmin, getAllFeedback); // Admin views all feedback
+router.post("/", authMiddleware, addFeedback); // Users submit feedback
+router.get("/:id", adminMiddleware, getFeedback); // Admin views specific feedback
+router.get("/", authMiddleware, getAllFeedback); // Admin views all feedback
 
 module.exports = router;

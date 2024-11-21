@@ -1,2 +1,54 @@
-.env,
-crw-app-23fec-firebase-adminsdk-sglad-4cd421c5ae.json,
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build files
+dist/
+build/
+
+# Cache files
+*.cache
+.cache/
+.nyc_output/
+coverage/
+
+# Debugger files
+.vscode/
+.idea/
+
+# Database files
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+*.pid
+
+# Redis dump
+dump.rdb
+
+# Jest coverage and cache
+/coverage
+/jest-cache
+/jest-coverage
+
+# Other
+*.lock
+*.bak
+*.orig
+*.rej
