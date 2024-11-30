@@ -5,6 +5,7 @@ const locationRoutes = require("./locationRoutes");
 const adminRoutes = require("./adminRoutes");
 const supportRoutes = require("./supportRoutes");
 const feedbackRoutes = require("./feedbackRoutes");
+const notificationRoutes = require("./notificationRoutes");
 const otpRoutes = require("./otpRoutes");
 module.exports = {
   adminRoutes,
@@ -14,5 +15,6 @@ module.exports = {
   locationRoutes,
   otpRoutes,
   supportRoutes,
+  notificationRoutes,
   feedbackRoutes,
 };

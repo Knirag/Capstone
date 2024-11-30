@@ -11,7 +11,7 @@ const sendOTP = async (phone_number) => {
       .services(process.env.TWILIO_VERIFY_SERVICE_SID)
       .verifications.create({
         to: phone_number,
-        channel: "sms", // You can use "call" for voice OTPs
+        channel: "sms",
       });
     return verification;
   } catch (error) {

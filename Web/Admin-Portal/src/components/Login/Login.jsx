@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { GoEye, GoEyeClosed } from "react-icons/go";
 import fLogo from "../../assets/Images/logo.png";
+import instance from "../../../api";
 
 const PageContainer = styled.div`
   display: flex;
@@ -131,6 +132,7 @@ const ToggleLink = styled.p`
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [signupStep, setSignupStep] = useState(1);
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -142,26 +144,141 @@ const LoginPage = () => {
     password: "",
     repeatPassword: "",
   });
+  const [locationData, setLocationData] = useState({
+    district: "",
+    sector: "",
+    cell: "",
+    village: "",
+  });
+  const [availableLocations, setAvailableLocations] = useState([]);
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInputChange = (e, formType) => {
-    const { name, value } = e.target;
-    if (formType === "login") {
-      setLoginFormData({ ...loginFormData, [name]: value });
-    } else {
-      setSignupFormData({ ...signupFormData, [name]: value });
+  // Fetch locations from the server
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await instance.get("/locations/");
+        console.log("Locations fetched successfully:", response.data);
+        setAvailableLocations(response.data); // Update state with locations
+      } catch (error) {
+        console.error(
+          "Error fetching locations:",
+          error.response?.data || error.message
+        );
+      }
+    };
+
+    if (signupStep === 2) {
+      fetchLocations();
     }
-  };
+  }, [signupStep]);
+
+
+
+const handleInputChange = (e, formType) => {
+  const { name, value } = e.target;
+  if (formType === "login") {
+    setLoginFormData({ ...loginFormData, [name]: value });
+  } else if (signupStep === 1) {
+    setSignupFormData({ ...signupFormData, [name]: value });
+  } else {
+    setLocationData({ ...locationData, [name]: value });
+  }
+};
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  const handleFormToggle = () => {
-    setIsLogin(!isLogin);
-    setError("");
-  };
+ const handleFormToggle = () => {
+   setIsLogin(!isLogin);
+   setSignupStep(1); // Reset signup step
+   setError("");
+ };
+
+   const handleNextStep = (e) => {
+     e.preventDefault();
+     if (signupStep === 1) {
+       // Validate first step
+       const { username, email, password, repeatPassword, role } =
+         signupFormData;
+       if (
+         !username ||
+         !email ||
+         !password ||
+         password !== repeatPassword ||
+         !role
+       ) {
+         setError("Please fill in all fields correctly.");
+         return;
+       }
+       setError("");
+       setSignupStep(2); // Proceed to location selection
+     }
+   };
+
+   // Handle Login Submission
+   const handleLogin = async (e) => {
+     e.preventDefault();
+     try {
+       const response = await instance.post("/admin/login", loginFormData);
+       const { token, admin } = response.data;
+
+       if (
+         ![
+           "districtLeader",
+           "sectorLeader",
+           "cellLeader",
+           "villageLeader",
+         ].includes(admin.role)
+       ) {
+         setError("Access denied: Unauthorized role.");
+         return;
+       }
+
+       localStorage.setItem("adminToken", token);
+       localStorage.setItem("adminRole", admin.role);
+
+       window.location.href = "/dashboard-admin";
+     } catch (error) {
+       console.error("Login Error:", error.response?.data || error.message);
+       setError("Login failed. Please check your credentials.");
+     }
+   };
+
+   // Handle Signup Submission
+   const handleSignup = async (e) => {
+     e.preventDefault();
+     if (!locationData.district || !locationData.sector || !locationData.cell) {
+       setError("Please fill in all location details.");
+       return;
+     }
+
+     const finalSignupData = {
+       ...signupFormData,
+       location_id:
+         signupFormData.role === "districtLeader"
+           ? locationData.district
+           : signupFormData.role === "sectorLeader"
+           ? locationData.sector
+           : signupFormData.role === "cellLeader"
+           ? locationData.cell
+           : locationData.village,
+     };
+     console.log("Final signup data:", finalSignupData);
+
+     try {
+       const response = await instance.post("/admin/signup", finalSignupData);
+       console.log("Signup successful:", response.data);
+
+       setIsLogin(true);
+       setSignupStep(1);
+     } catch (error) {
+       console.error("Signup Error:", error.response?.data || error.message);
+       setError("Signup failed. Please try again.");
+     }
+   };
 
   return (
     <PageContainer>
@@ -174,7 +291,7 @@ const LoginPage = () => {
         <Title>{isLogin ? "Login" : "Create Account"}</Title>
 
         {isLogin ? (
-          <form>
+          <form onSubmit={handleLogin}>
             <InputField>
               <Label>Email</Label>
               <Input
@@ -182,6 +299,7 @@ const LoginPage = () => {
                 name="email"
                 value={loginFormData.username}
                 onChange={(e) => handleInputChange(e, "login")}
+                required
               />
             </InputField>
             <InputField>
@@ -192,17 +310,19 @@ const LoginPage = () => {
                   name="password"
                   value={loginFormData.password}
                   onChange={(e) => handleInputChange(e, "login")}
+                  required
                 />
                 <Icon onClick={togglePasswordVisibility}>
                   {isPasswordVisible ? <GoEye /> : <GoEyeClosed />}
                 </Icon>
               </PasswordContainer>
               <ForgotPasswordLink href="#">Forgot Password?</ForgotPasswordLink>
+              {error && <p style={{ color: "red" }}>{error}</p>}
             </InputField>
             <Button type="submit">Login</Button>
           </form>
-        ) : (
-          <form>
+        ) : signupStep === 1 ? (
+          <form onSubmit={handleNextStep}>
             <InputField>
               <Label>Username</Label>
               <Input
@@ -210,6 +330,7 @@ const LoginPage = () => {
                 name="username"
                 value={signupFormData.username}
                 onChange={(e) => handleInputChange(e, "signup")}
+                required
               />
             </InputField>
             <InputField>
@@ -219,6 +340,7 @@ const LoginPage = () => {
                 name="email"
                 value={signupFormData.email}
                 onChange={(e) => handleInputChange(e, "signup")}
+                required
               />
             </InputField>
             <InputField>
@@ -236,6 +358,7 @@ const LoginPage = () => {
                   color: "#333",
                   backgroundColor: "#fff",
                 }}
+                required
               >
                 <option value="">Select Role</option>
                 <option value="cellLeader">Cell Leader</option>
@@ -250,6 +373,7 @@ const LoginPage = () => {
                   name="password"
                   value={signupFormData.password}
                   onChange={(e) => handleInputChange(e, "signup")}
+                  required
                 />
                 <Icon onClick={togglePasswordVisibility}>
                   {isPasswordVisible ? <GoEye /> : <GoEyeClosed />}
@@ -264,12 +388,147 @@ const LoginPage = () => {
                   name="repeatPassword"
                   value={signupFormData.repeatPassword}
                   onChange={(e) => handleInputChange(e, "signup")}
+                  required
                 />
                 <Icon onClick={togglePasswordVisibility}>
                   {isPasswordVisible ? <GoEye /> : <GoEyeClosed />}
                 </Icon>
               </PasswordContainer>
             </InputField>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            <Button type="submit">Next Step</Button>
+          </form>
+        ) : (
+          <form onSubmit={handleSignup}>
+            <InputField>
+              <Label>District</Label>
+              <select
+                name="district"
+                value={locationData.district}
+                onChange={(e) => handleInputChange(e, "location")}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.9rem",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  fontSize: "1rem",
+                  color: "#333",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <option value="">Select District</option>
+                {availableLocations
+                  .filter((loc) => loc.level === "district")
+                  .map((loc) => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </option>
+                  ))}
+              </select>
+            </InputField>
+            <InputField>
+              <Label>Sector</Label>
+              <select
+                name="sector"
+                value={locationData.sector}
+                onChange={(e) => handleInputChange(e, "location")}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.9rem",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  fontSize: "1rem",
+                  color: "#333",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <option value="">Select Sector</option>
+                {availableLocations
+                  .filter(
+                    (loc) =>
+                      loc.level === "sector" &&
+                      loc.parent_id === locationData.district
+                  )
+                  .map((loc) => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </option>
+                  ))}
+              </select>
+            </InputField>
+
+            {/* Cell Selection */}
+            {["cellLeader", "villageLeader"].includes(signupFormData.role) && (
+              <InputField>
+                <label>Cell</label>
+                <select
+                  name="cell"
+                  value={locationData.cell}
+                  onChange={(e) => handleInputChange(e, "location")}
+                  disabled={!locationData.sector} // Ensure sector is selected before enabling cell
+                  style={{
+                    width: "100%",
+                    padding: "0.9rem",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                    color: "#333",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <option value="">Select Cell</option>
+                  {availableLocations
+                    .filter(
+                      (loc) =>
+                        loc.level === "cell" &&
+                        loc.parent_id === locationData.sector
+                    )
+                    .map((loc) => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.name}
+                      </option>
+                    ))}
+                </select>
+              </InputField>
+            )}
+
+            {/* Village Selection */}
+            {signupFormData.role === "villageLeader" && (
+              <InputField>
+                <label>Village</label>
+                <select
+                  name="village"
+                  value={locationData.village}
+                  onChange={(e) => handleInputChange(e, "location")}
+                  disabled={!locationData.cell} // Ensure cell is selected before enabling village
+                  style={{
+                    width: "100%",
+                    padding: "0.9rem",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                    color: "#333",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <option value="">Select Village</option>
+                  {availableLocations
+                    .filter(
+                      (loc) =>
+                        loc.level === "village" &&
+                        loc.parent_id === locationData.cell
+                    )
+                    .map((loc) => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.name}
+                      </option>
+                    ))}
+                </select>
+              </InputField>
+            )}
+
             {error && <p style={{ color: "red" }}>{error}</p>}
             <Button type="submit">Sign Up</Button>
           </form>

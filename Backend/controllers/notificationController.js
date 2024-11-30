@@ -1,18 +1,23 @@
-const { updateUserPushToken } = require("../models/User");
+const { getUsersByLocation } = require("../models/User");
+const { sendNotification } = require("../utils/notifications");
 
-exports.registerPushToken = async (req, res) => {
-  const { push_token } = req.body;
-
-  if (push_token) {
-    return res.status(400).json({ message: "Push token is required." });
-  }
+exports.sendNotification = async (req, res) => {
+  const { title, message } = req.body;
+  const adminLocationId = req.user.location_id;
 
   try {
-    const userId = req.user.id; // Auth middleware attaches `user` to the request
-    await updateUserPushToken(userId, push_token);
-    res.status(200).json({ message: "Push token registered successfully." });
+    const users = await getUsersByLocation(adminLocationId);
+
+    const pushTokens = users.map((user) => user.push_token);
+    if (pushTokens.length > 0) {
+      await sendNotification(pushTokens, title, message, {
+        type: "admin_notification",
+      });
+    }
+
+    res.status(200).json({ message: "Notification sent successfully." });
   } catch (error) {
-    console.error("Error registering push token:", error);
-    res.status(500).json({ message: "Failed to register push token." });
+    console.error("Error sending notification:", error);
+    res.status(500).json({ message: "Failed to send notification.", error });
   }
 };

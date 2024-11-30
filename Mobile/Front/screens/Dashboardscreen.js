@@ -1,135 +1,174 @@
-import react, {useState} from 'react'
+import React, { useState, useEffect } from "react";
 import {
   View,
-  Image,
-  StyleSheet,
   Text,
-  TouchableOpacity,
+  StyleSheet,
   ScrollView,
-  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import axios from "../utils/api";
 import Colours from "../constants/colors";
+
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    flex: 1,
+    backgroundColor: Colours.white,
   },
   header: {
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "center",
     marginTop: 30,
-    height: 50,
-    width: "100%",
-    paddingHorizontal: 40,
-    borderBottomWidth: 2,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
     borderBottomColor: Colours.skyblue,
     marginBottom: 20,
+    paddingBottom: 10,
   },
   headerText: {
-    justifyContent: "space-between",
-    width: "35%",
-    color: Colours.darkgray,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
-    marginRight: 50,
+    color: Colours.darkgray,
+  },
+  icon: {
+    padding: 10,
   },
   body: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "column",
-    width: "100%",
+    flex: 1,
+    paddingHorizontal: 20,
   },
   week: {
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    paddingHorizontal: 20,
-    paddingVertical: 0,
-    width: "100%",
+    marginBottom: 20,
   },
-  durationlabel: {
-    fontSize: 21,
+  durationLabel: {
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
-    justifyContent: "flex-start",
     color: Colours.darkgray,
+    marginBottom: 10,
   },
   event: {
-    borderRadius: 20,
-    width: "100%",
     flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    padding: 10,
-    marginTop: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
     marginBottom: 10,
-    backgroundColor: "rgba(140, 221, 255, 0.22)",
-    backgroundOpacity: 0.1,
+    backgroundColor: Colours.lightgray,
+    borderRadius: 10,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },
   },
   eventDetails: {
-    flexDirection: "column",
-    zIndex: 1,
+    flex: 1,
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: Colours.darkgray,
-    marginLeft: 10,
-    flexDirection: "row",
-    width: "100%",
-    flexWrap: "wrap",
-    zIndex: 1,
   },
-  eventRow: {
+  eventInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 5,
-    marginLeft: 0,
-    marginTop: 12,
-    width: "100%",
-    zIndex: 1,
+    marginTop: 5,
   },
   eventDate: {
-    flexDirection: "column",
-    fontSize: 18,
+    fontSize: 14,
     color: Colours.darkgray,
-    marginLeft: 10,
   },
   eventTime: {
-    flexDirection: "column",
-    fontSize: 18,
+    fontSize: 14,
     color: Colours.darkgray,
-    marginLeft: 10,
   },
   eventExpand: {
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    marginTop: -12,
     fontSize: 20,
-    fontWeight: "condensed",
     color: Colours.blue,
-    zIndex: 99,
+  },
+  loader: {
+    marginTop: 20,
+  },
+  errorText: {
+    color: Colours.red,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 
 const Dashboardscreen = () => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [userLocationId, setUserLocationId] = useState(null);
   const navigation = useNavigation();
 
-  const navigateToEvent = () => {
-    navigation.navigate("EventDetails");
+  // Fetch user location ID and events
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Retrieve user token from AsyncStorage
+        const token = await AsyncStorage.getItem("userToken");
+        if (!token) {
+          setError("User is not logged in.");
+          setLoading(false);
+          return;
+        }
+
+        // Retrieve user location from the backend
+        const userResponse = await axios.get("/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const locationId = userResponse.data.location_id; // Adjust key as per your API response
+        setUserLocationId(locationId);
+
+        // Fetch events using the location ID
+        const response = await axios.get("/events", {
+          params: { location_id: locationId },
+          headers: { Authorization: `Bearer ${token}` }, // Pass token if required
+        });
+        setEvents(response.data);
+      } catch (err) {
+        console.error("Error fetching events:", err.response || err.message);
+        setError("Failed to load events. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const groupEventsByWeek = () => {
+    const now = new Date();
+    const thisWeek = [];
+    const nextWeek = [];
+
+    events.forEach((event) => {
+      const eventDate = new Date(event.event_date);
+      const diffInDays = Math.floor((eventDate - now) / (1000 * 60 * 60 * 24));
+
+      if (diffInDays >= 0 && diffInDays < 7) {
+        thisWeek.push(event);
+      } else if (diffInDays >= 7 && diffInDays < 14) {
+        nextWeek.push(event);
+      }
+    });
+
+    return { thisWeek, nextWeek };
   };
+
+  const { thisWeek, nextWeek } = groupEventsByWeek();
+
+  const navigateToEventDetails = (event) => {
+    navigation.navigate("EventDetails", { event });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -141,44 +180,87 @@ const Dashboardscreen = () => {
           style={styles.icon}
         />
       </View>
-      <View style={styles.body}>
-      <ScrollView>
+
+      <ScrollView style={styles.body}>
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            color={Colours.blue}
+            style={styles.loader}
+          />
+        )}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
         <View style={styles.week}>
-          <Text style={styles.durationlabel}>This Week</Text>
-          <TouchableOpacity style={styles.event}>
-            <View style={styles.eventDetails}>
-              <Text style={styles.eventTitle}>Event Title</Text>
-              <View style={styles.eventRow}>
-                <Text style={styles.eventDate}>Date</Text>
-                <Text style={styles.eventTime}>Time</Text>
+          <Text style={styles.durationLabel}>This Week</Text>
+          {thisWeek.length > 0 ? (
+            thisWeek.map((event) => (
+              <TouchableOpacity
+                key={event.id}
+                style={styles.event}
+                onPress={() => navigateToEventDetails(event)}
+              >
+                <View style={styles.eventDetails}>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <View style={styles.eventInfo}>
+                    <Text style={styles.eventDate}>
+                      {new Date(event.event_date).toLocaleDateString()}
+                    </Text>
+                    <Text style={styles.eventTime}>
+                      {new Date(event.event_date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                  </View>
+                </View>
                 <Icon
                   name="chevron-forward-outline"
                   style={styles.eventExpand}
                 />
-              </View>
-            </View>
-          </TouchableOpacity>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text>No events this week.</Text>
+          )}
         </View>
+
         <View style={styles.week}>
-          <Text style={styles.durationlabel}>Next Week</Text>
-          <TouchableOpacity style={styles.event} onPress={navigateToEvent}>
-            <View style={styles.eventDetails}>
-              <Text style={styles.eventTitle}>Event Title</Text>
-              <View style={styles.eventRow}>
-                <Text style={styles.eventDate}>Date</Text>
-                <Text style={styles.eventTime}>Time</Text>
+          <Text style={styles.durationLabel}>Next Week</Text>
+          {nextWeek.length > 0 ? (
+            nextWeek.map((event) => (
+              <TouchableOpacity
+                key={event.id}
+                style={styles.event}
+                onPress={() => navigateToEventDetails(event)}
+              >
+                <View style={styles.eventDetails}>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <View style={styles.eventInfo}>
+                    <Text style={styles.eventDate}>
+                      {new Date(event.event_date).toLocaleDateString()}
+                    </Text>
+                    <Text style={styles.eventTime}>
+                      {new Date(event.event_date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                  </View>
+                </View>
                 <Icon
                   name="chevron-forward-outline"
                   style={styles.eventExpand}
                 />
-              </View>
-            </View>
-          </TouchableOpacity>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text>No events next week.</Text>
+          )}
         </View>
       </ScrollView>
-      </View>
     </View>
   );
-}
+};
 
-export default Dashboardscreen
+export default Dashboardscreen;

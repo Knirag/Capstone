@@ -1,0 +1,288 @@
+openapi: 3.0.0
+info:
+  title: CRW API
+  description: API documentation for CRW application
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+
+components:
+  schemas:
+    Admin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          maxLength: 100
+        username:
+          type: string
+          maxLength: 50
+        password:
+          type: string
+          maxLength: 255
+        role:
+          type: string
+          enum:
+            - districtLeader
+            - sectorLeader
+            - cellLeader
+            - villageLeader
+        location_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+          
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        event_date:
+          type: string
+          format: date-time
+        location_id:
+          type: string
+          format: uuid
+        event_place:
+          type: string
+          maxLength: 255
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Location:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        level:
+          type: string
+          enum:
+            - district
+            - sector
+            - cell
+            - village
+        parent_id:
+          type: string
+          format: uuid
+
+    Support:
+      type: object
+      properties:
+        id:
+          type: integer
+        admin_id:
+          type: integer
+        feedback_id:
+          type: integer
+        response:
+          type: string
+        status:
+          type: string
+          enum:
+            - pending
+            - in_progress
+            - resolved
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        phone_number:
+          type: string
+          maxLength: 15
+        username:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          maxLength: 100
+        age:
+          type: integer
+        location_id:
+          type: string
+          format: uuid
+        home_address:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+        password:
+          type: string
+          maxLength: 255
+        push_token:
+          type: string
+          maxLength: 255
+
+    UserEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        attended:
+          type: boolean
+        reminder_set:
+          type: boolean
+        reminder_time:
+          type: string
+          format: date-time
+
+    UserToken:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        fcm_token:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+
+paths:
+  /admins:
+    get:
+      summary: Get all admins
+      responses:
+        '200':
+          description: List of admins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Admin'
+    post:
+      summary: Create a new admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+      responses:
+        '201':
+          description: Admin created
+          
+  /events:
+    get:
+      summary: Get all events
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      summary: Create a new event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Event created
+
+  /feedback:
+    get:
+      summary: Get all feedback
+      responses:
+        '200':
+          description: List of feedbacks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feedback'
+    post:
+      summary: Submit feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Feedback'
+      responses:
+        '201':
+          description: Feedback created
+
+  /users:
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User registered

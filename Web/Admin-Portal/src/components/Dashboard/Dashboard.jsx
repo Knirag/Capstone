@@ -85,6 +85,15 @@ const IconWrapper = styled.div`
 `;
 
 const Dashboard = () => {
+  const role = localStorage.getItem("adminRole");
+
+  if (
+    !["districtLeader", "sectorLeader", "cellLeader", "villageLeader"].includes(
+      role
+    )
+  ) {
+    return <p>Access denied: Admins only</p>;
+  }
   return (
     <DashboardContainer>
       <Header>Dashboard</Header>
@@ -94,7 +103,6 @@ const Dashboard = () => {
         <option value="Jan">January</option>
         <option value="Feb">February</option>
         <option value="Mar">March</option>
-        {/* Add remaining months as options */}
       </MonthlySelector>
 
       <TopRow>

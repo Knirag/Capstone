@@ -1,5 +1,4 @@
 const express = require("express");
-const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 const {
   createEvent,
@@ -10,14 +9,13 @@ const {
 
 const router = express.Router();
 
-// Admin routes
-
-router.post("/", authMiddleware, adminMiddleware, createEvent);
-router.put("/:id", authMiddleware, adminMiddleware, updateEvent);
-
-router.get("/:location_id", getEventsByLocation);
-router.get("/event/:id", authMiddleware, getEventById);
 
 
+router.post("/", adminMiddleware, createEvent); // Create Event
+router.put("/:id", adminMiddleware, updateEvent); // Update Event
+
+// Public routes
+router.get("/", getEventsByLocation); // Get Events by Location (Query Parameter)
+router.get("/events/:id", getEventById); // Get Event by ID
 
 module.exports = router;

@@ -1,120 +1,187 @@
 const request = require("supertest");
 const pool = require("../config/db");
 const app = require("../app");
+const bcrypt = require("bcryptjs");
 const { generateToken } = require("../utils/jwtHelper");
-describe("Event Controller", () => {
-  let token;
+const { sendNotification } = require("../utils/notifications");
+const { v4: uuidv4 } = require("uuid"); // Import UUID package
+
+jest.mock("../utils/notifications", () => ({
+  sendNotification: jest.fn(), // Ensure it's mocked
+}));
+
+describe("Event Controller - Cell Leader", () => {
+  let testCellId, testVillageId, cellLeaderToken, cellLeaderId;
 
   beforeAll(async () => {
-    require("dotenv").config(); 
-    console.log("Creating admin user...");
+    // Create locations with UUIDs
+    testCellId = uuidv4();
+    await pool.query(
+      `INSERT INTO locations (id, name, level) VALUES (?, 'Test Cell', 'cell')`,
+      [testCellId]
+    );
 
-    // Sign up the admin user
-    const signupResponse = await request(app).post("/api/admin/signup").send({
-      id: 1,
-      username: "adminuser",
-      email: "admin@example.com",
-      password: "adminpassword",
-      role: "district",
-      location_id: 1,
+    testVillageId = uuidv4();
+    await pool.query(
+      `INSERT INTO locations (id, name, level, parent_id) 
+       VALUES (?, 'Test Village', 'village', ?)`,
+      [testVillageId, testCellId]
+    );
+
+    // Create users with UUIDs
+    const user1Id = uuidv4();
+    const user2Id = uuidv4();
+    const hashedPassword = await bcrypt.hash("password123", 10);
+
+    await pool.query(
+      `INSERT INTO users (id, phone_number, username, push_token, location_id, password) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        user1Id,
+        "1234567890",
+        "User One",
+        "test-token-1",
+        testCellId,
+        hashedPassword,
+      ]
+    );
+    await pool.query(
+      `INSERT INTO users (id, phone_number, username, push_token, location_id, password) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        user2Id,
+        "0987654321",
+        "User Two",
+        "test-token-2",
+        testVillageId,
+        hashedPassword,
+      ]
+    );
+
+    // Insert cell leader with UUID
+    cellLeaderId = uuidv4();
+    const leaderPassword = await bcrypt.hash("password123", 10);
+    await pool.query(
+      `INSERT INTO admins (id, username, email, password, role, location_id) 
+       VALUES (?, 'cellLeaderUser', 'cellleader@example.com', ?, 'cellLeader', ?)`,
+      [cellLeaderId, leaderPassword, testCellId]
+    );
+
+    // Generate token for cell leader
+    cellLeaderToken = generateToken({
+      id: cellLeaderId,
+      role: "cellLeader",
+      location_id: testCellId,
     });
 
-    console.log("Signup response:", signupResponse.body);
+    // Create an event for the cell location with UUID
+    const eventId = uuidv4();
+    await pool.query(
+      `INSERT INTO events (id, title, description, event_date, location_id, created_by, event_place) 
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        eventId,
+        "Cell Leader Event",
+        "A test event for the cell",
+        "2024-12-01 10:00:00",
+        testCellId,
+        cellLeaderId,
+        "Test Event Place",
+      ]
+    );
 
-    // Login to get the token
-    const loginResponse = await request(app).post("/api/admin/login").send({
-      email: "admin@example.com",
-      password: "adminpassword",
-    });
-
-    token = loginResponse.body.token;
-    console.log("Generated token:", token);
-
-    // Verify the token contains necessary data
-    try {
-      const tokenData = JSON.parse(atob(token.split(".")[1]));
-      console.log("Token payload:", tokenData);
-    } catch (error) {
-      console.log("Error decoding token:", error);
-    }
+    // Debug: Check inserted events
+    const [rows] = await pool.query(
+      `SELECT * FROM events WHERE location_id = ?`,
+      [testCellId]
+    );
+    console.log("All Events Inserted for Test Cell:", rows);
   });
 
-it("should create a new event and send push notifications", async () => {
-  // Step 1: Store the push token for the user
-  const pushTokenResponse = await request(app)
-    .post("/api/users/push-token")
-    .set("Authorization", `Bearer ${token}`)
-    .send({ push_token: "ExponentPushToken[valid_token_here]" });
+  afterAll(async () => {
+    // Clean up
+    await pool.query(`DELETE FROM events WHERE location_id = ?`, [testCellId]);
+    await pool.query(`DELETE FROM locations WHERE id IN (?, ?)`, [
+      testCellId,
+      testVillageId,
+    ]);
+    await pool.query(`DELETE FROM users WHERE location_id IN (?, ?)`, [
+      testCellId,
+      testVillageId,
+    ]);
+    await pool.query(`DELETE FROM admins WHERE id = ?`, [cellLeaderId]);
+    if (pool) await pool.end();
+  });
 
-  console.log("Store Push Token Response:", pushTokenResponse.body);
-  expect(pushTokenResponse.status).toBe(200);
-  expect(pushTokenResponse.body.message).toBe(
-    "Push token stored successfully."
-  );
+  test("should create a new event for the cell and notify users in cell and villages", async () => {
+    const createEventData = {
+      title: "New Event",
+      description: "A test event",
+      event_date: "2024-12-01 10:00:00",
+      location_id: testCellId,
+      event_place: "Test Location",
+      created_by: cellLeaderId,
+    };
 
-  // Step 2: Create a new event
-  console.log("Attempting to create event with token:", token);
-  const eventData = {
-    title: "Test Event",
-    description: "This is a test event",
-    event_date: "2024-12-02 15:00:00",
-    location_id: 1,
-  };
-
-  const response = await request(app)
-    .post("/api/events")
-    .set("Authorization", `Bearer ${token}`)
-    .send(eventData);
-
-  console.log("Create Event API Response:", response.body);
-  expect(response.status).toBe(201);
-  expect(response.body.message).toBe("Event created and notifications sent."); // Adjusted message
-});
-
-  it("should retrieve events by location", async () => {
-    // Create an event first
     const createEventResponse = await request(app)
       .post("/api/events")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        title: "Test Event for Retrieval",
-        description: "This is another test event",
-        event_date: "2024-12-02 13:00:00",
-        location_id: 1,
-      });
+      .set("Authorization", `Bearer ${cellLeaderToken}`)
+      .send(createEventData);
 
     console.log("Create Event Response:", createEventResponse.body);
 
-    // Retrieve events for location_id 1
-    const response = await request(app)
-      .get("/api/events/1") // Matches route definition
-      .set("Authorization", `Bearer ${token}`); // Add token for auth
-
-    console.log("Retrieve Events API Response:", response.body);
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBeGreaterThan(0);
+    expect(createEventResponse.status).toBe(201);
+    expect(createEventResponse.body).toHaveProperty("event");
+    expect(createEventResponse.body.event).toHaveProperty("id");
   });
 
-  // Add cleanup after all tests
-    afterAll(async () => {
-      console.log("Cleaning up test data...");
-      try {
-        // Delete test events
-        await pool.query("DELETE FROM events WHERE location_id = ?", [1]);
+  test("should retrieve events by location for the cell and villages", async () => {
+    const response = await request(app)
+      .get("/api/events")
+      .query({ location_id: testCellId })
+      .set("Authorization", `Bearer ${cellLeaderToken}`);
 
-        // Delete test admin user
-        await pool.query("DELETE FROM users WHERE email = ?", [
-          "admin@example.com",
-        ]);
+    console.log("Event Retrieval Response:", response.body);
 
-        console.log("Cleanup completed.");
-      } catch (error) {
-        console.error("Error during cleanup:", error);
-      } finally {
-        // Close the database connection
-        await pool.end();
-      }
-    });
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBeGreaterThan(0); // Ensure events are returned
+    expect(response.body[0]).toHaveProperty("title", "Cell Leader Event");
+  });
 
+  test("should update an event and not change its location", async () => {
+    const createEventData = {
+      title: "Update Event",
+      description: "Updated test event",
+      event_date: "2024-12-01 10:00:00",
+      location_id: testCellId,
+      event_place: "Updated Test Location",
+      created_by: cellLeaderId,
+    };
+
+    const createEventResponse = await request(app)
+      .post("/api/events")
+      .set("Authorization", `Bearer ${cellLeaderToken}`)
+      .send(createEventData);
+
+    const eventId = createEventResponse.body.event.id;
+
+    const updateEventData = {
+      title: "Updated Title",
+      description: "Updated Description",
+      event_date: "2024-12-02 10:00:00",
+      event_place: "Updated Event Location",
+    };
+
+    const updateEventResponse = await request(app)
+      .put(`/api/events/${eventId}`)
+      .set("Authorization", `Bearer ${cellLeaderToken}`)
+      .send(updateEventData);
+
+    console.log("Update Event Response:", updateEventResponse.body);
+
+    expect(updateEventResponse.status).toBe(200);
+    expect(updateEventResponse.body).toHaveProperty("event");
+    expect(updateEventResponse.body.event.title).toBe("Updated Title");
+  });
 });

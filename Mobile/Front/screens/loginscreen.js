@@ -7,105 +7,15 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import Colours from "../constants/colors";
-
-const Loginscreen = () => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [secureText, setSecureText] = useState(true);
-
-  const toggleSecureText = () => {
-    setSecureText(!secureText);
-  };
-
-  const handlePhoneNumberChange = (input) => {
-    const formattedInput = input.replace(/^0+/, ""); // Removes leading 0s
-    if (formattedInput.length <= 9) {
-      setPhoneNumber(formattedInput);
-    }
-  };
-
-  const navigation = useNavigation();
-
-  const navigateToSignup = () => {
-  console.log("Navigating to Signup button works ...");
-    navigation.navigate("Signup");
-  };
-
-  return (
-    <LinearGradient
-      style={{ flex: 1 }}
-      colors={[Colours.primary, Colours.secondary]}
-    >
-      <View style={styles.container}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.heading}>Sign In to Your Account</Text>
-        <View style={styles.subtext}>
-          <Text>Don't have an Account?</Text>
-          <TouchableOpacity
-            onPress={navigateToSignup}
-            style={styles.touchableArea}
-            hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }} 
-          >
-            <Text
-              style={{ color: Colours.blue, fontWeight: "500", fontSize: 16 }}
-            >
-              Signup Here
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.countryCode}>+250</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              keyboardType="numeric"
-              value={phoneNumber}
-              onChangeText={handlePhoneNumberChange}
-              maxLength={9}
-            />
-          </View>
-
-          {/* Password Field */}
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              secureTextEntry={secureText}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={toggleSecureText}>
-              <Icon
-                name={secureText ? "eye-off" : "eye"}
-                size={24}
-                color={Colours.darkgray}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.button}>
-          <LinearGradient
-            colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
-            style={styles.gradientButton}
-          >
-            <Text style={styles.buttonText}>Login</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-  );
-};
-
-export default Loginscreen;
-
+import { login } from "../utils/auth"; 
 const styles = StyleSheet.create({
   container: {
     display: "flex",
@@ -191,3 +101,114 @@ const styles = StyleSheet.create({
     paddingVertical: 10, // Expand vertically
   },
 });
+const Loginscreen = () => {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [secureText, setSecureText] = useState(true);
+  const navigation = useNavigation();
+
+  const toggleSecureText = () => setSecureText(!secureText);
+
+  const handlePhoneNumberChange = (input) => {
+    const formattedInput = input.replace(/^0+/, ""); // Removes leading 0s
+    if (formattedInput.length <= 9) setPhoneNumber(formattedInput);
+  };
+
+  const handleLogin = async () => {
+    try {
+      const data = await login(phoneNumber, password);
+      Alert.alert("Success", "Login successful!");
+      console.log("Logged in user data:", data);
+
+      // Navigate to the next screen
+      navigation.navigate("MainTabs"); 
+    } catch (error) {
+      Alert.alert(
+        "Login Failed",
+        error.message || "Unable to login. Please try again."
+      );
+    }
+  };
+
+    const navigateToSignup = () => {
+      console.log("Navigating to Signup button works ...");
+      navigation.navigate("Signup");
+    };
+
+  return (
+    <LinearGradient
+      style={{ flex: 1 }}
+      colors={[Colours.primary, Colours.secondary]}
+    >
+    <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+      <View style={styles.container}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <Text style={styles.heading}>Sign In to Your Account</Text>
+        <View style={styles.subtext}>
+          <Text>Don't have an Account?</Text>
+          <TouchableOpacity
+            onPress={navigateToSignup}
+            style={styles.touchableArea}
+            hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
+          >
+            <Text
+              style={{ color: Colours.blue, fontWeight: "500", fontSize: 16 }}
+            >
+              Signup Here
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.countryCode}>+250</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              keyboardType="numeric"
+              value={phoneNumber}
+              onChangeText={handlePhoneNumberChange}
+              maxLength={9}
+            />
+          </View>
+
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry={secureText}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={toggleSecureText}>
+              <Icon
+                name={secureText ? "eye-off" : "eye"}
+                size={24}
+                color={Colours.darkgray}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <LinearGradient
+            colors={["#02b4fa", "#1475fc"]}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.buttonText}>Login</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
+  );
+};
+
+export default Loginscreen;

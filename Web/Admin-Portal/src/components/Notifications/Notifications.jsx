@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Colours from "../../assets/Colours/Colours";
+import instance from "../../../api";
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -45,36 +46,6 @@ const Input = styled.input`
   }
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  height: 120px;
-  padding: 12px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid ${Colours.lightgray};
-  margin-bottom: 20px;
-  resize: none;
-  &:focus {
-    outline: none;
-    border-color: ${Colours.blue};
-    box-shadow: 0 0 6px rgba(102, 166, 255, 0.3);
-  }
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid ${Colours.lightgray};
-  margin-bottom: 20px;
-  &:focus {
-    outline: none;
-    border-color: ${Colours.blue};
-    box-shadow: 0 0 6px rgba(102, 166, 255, 0.3);
-  }
-`;
-
 const Button = styled.button`
   background: ${Colours.blue};
   color: #fff;
@@ -89,160 +60,212 @@ const Button = styled.button`
     box-shadow: 0 4px 10px rgba(85, 139, 211, 0.4);
   }
 `;
-
-const HistoryContainer = styled.div`
+const EventsContainer = styled.div`
   margin-top: 30px;
-`;
-
-const HistoryHeader = styled.h2`
-  font-size: 1.5rem;
-  color: ${Colours.darkgray};
-  margin-bottom: 15px;
-  text-align: center;
-  position: relative;
-  &::after {
-    content: "";
-    display: block;
-    width: 50%;
-    height: 2px;
-    background: ${Colours.lightgray};
-    margin: 10px auto 0;
-  }
-`;
-
-const NotificationCard = styled.div`
-  background: ${Colours.white};
-  border-radius: 10px;
   padding: 20px;
+  border-top: 1px solid #ccc;
+`;
+
+const EventCard = styled.div`
+  padding: 15px;
+  border-bottom: 1px solid #f1f1f1;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const NotificationHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+const EventTitle = styled.h3`
+  font-size: 1.25rem;
+  margin-bottom: 5px;
 `;
 
-const NotificationTitle = styled.h3`
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: ${Colours.darkgray};
-`;
-
-const NotificationDate = styled.span`
-  font-size: 0.9rem;
-  color: ${Colours.gray};
-`;
-
-const NotificationContent = styled.p`
-  color: ${Colours.gray};
+const EventDate = styled.p`
   font-size: 1rem;
-  margin-top: 10px;
+  color: #777;
+`;
+
+const EventDetails = styled.p`
+  font-size: 1rem;
+  color: #555;
 `;
 
 const Notifications = () => {
-  const [message, setMessage] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [notificationHistory, setNotificationHistory] = useState([
-    {
-      title: "System Update",
-      date: "2024-10-10",
-      time: "08:00 AM",
-      content: "We are undergoing scheduled maintenance this weekend.",
-    },
-    {
-      title: "Weather Alert",
-      date: "2024-10-05",
-      time: "03:00 PM",
-      content: "Severe weather warning for your area. Stay safe!",
-    },
-  ]);
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("");
+  const [eventPlace, setEventPlace] = useState("");
+  const [adminLocation, setAdminLocation] = useState(""); // Admin's location ID
+  const [adminId, setAdminId] = useState(""); // Admin's ID
+  const [events, setEvents] = useState([]); // Events to display
 
-  const handleSendNotification = () => {
-    const newNotification = {
-      title: "New Notification",
-      date,
-      time,
-      content: message,
+  // Fetch admin location and events on mount
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        console.error("No token found, unable to fetch admin data");
+        return;
+      }
+
+      try {
+        const adminResponse = await instance.get("/admin/current", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const { id, location_id } = adminResponse.data.admin;
+        console.log("Fetched admin data:", adminResponse.data.admin); // Debugging
+        setAdminLocation(location_id); // Set the admin location ID
+        setAdminId(id); // Set the admin ID
+      } catch (error) {
+        console.error("Error fetching admin data:", error.response || error);
+      }
     };
 
-    setNotificationHistory([newNotification, ...notificationHistory]);
-    setMessage("");
-    setRecipient("");
-    setDate("");
-    setTime("");
-    alert("Notification sent successfully!");
+    fetchAdminData();
+  }, []);
+
+  // Fetch events once admin location is available
+  useEffect(() => {
+    if (adminLocation) {
+      console.log("Fetching events for location:", adminLocation); // Debugging
+      fetchScheduledEvents();
+    }
+  }, [adminLocation]);
+
+  const fetchScheduledEvents = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        console.error("No token found, unable to fetch events");
+        return;
+      }
+
+      const response = await instance.get(`/events`, {
+        params: { location_id: adminLocation },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Fetched events:", response.data); // Debugging
+      setEvents(response.data); // Update state with fetched events
+    } catch (error) {
+      console.error(
+        "Error fetching scheduled events:",
+        error.response || error
+      );
+    }
   };
+
+  const handleCreateEvent = async () => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      console.error("No token found, cannot fetch admin data");
+      return;
+    }
+
+    try {
+      const eventDateTime = `${eventDate} ${eventTime}`;
+      const eventData = {
+        title: eventTitle,
+        description: eventDescription,
+        event_date: eventDateTime,
+        location_id: adminLocation,
+        event_place: eventPlace,
+        created_by: adminId,
+      };
+
+      await instance.post("/events", eventData);
+      alert("Event created successfully!");
+
+      setEventTitle("");
+      setEventDescription("");
+      setEventDate("");
+      setEventTime("");
+      setEventPlace("");
+
+      fetchScheduledEvents(); // Refresh events
+    } catch (error) {
+      console.error("Error creating event:", error.response || error);
+      alert("Failed to create event.");
+    }
+  };
+
 
   return (
     <PageContainer>
-      <Header>Notification Center</Header>
+      <Header>Create and Send Event Notification</Header>
 
-      {/* Notification Form */}
+      {/* Event Form */}
       <FormContainer>
-        <Label htmlFor="message">Description:</Label>
-        <TextArea
-          id="message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your notification here..."
+        <Label htmlFor="title">Event Title:</Label>
+        <Input
+          id="title"
+          value={eventTitle}
+          onChange={(e) => setEventTitle(e.target.value)}
+          placeholder="Enter event title"
         />
 
-        <Label htmlFor="recipient">Recipient:</Label>
-        <Select
-          id="recipient"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-        >
-          <option value="">Select recipient level</option>
-          <option value="All Constituents">All Constituents</option>
-          <option value="District Leaders">District Leaders</option>
-          <option value="Village Leaders">Village Leaders</option>
-        </Select>
+        <Label htmlFor="description">Description:</Label>
+        <Input
+          id="description"
+          value={eventDescription}
+          onChange={(e) => setEventDescription(e.target.value)}
+          placeholder="Type event description"
+        />
 
         <Label htmlFor="date">Date:</Label>
         <Input
           type="date"
           id="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
         />
 
         <Label htmlFor="time">Time:</Label>
         <Input
           type="time"
           id="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
+          value={eventTime}
+          onChange={(e) => setEventTime(e.target.value)}
         />
 
-        <Button onClick={handleSendNotification}>Send Notification</Button>
+        <Label htmlFor="eventPlace">Event Place:</Label>
+        <Input
+          id="eventPlace"
+          value={eventPlace}
+          onChange={(e) => setEventPlace(e.target.value)}
+          placeholder="Enter event place"
+        />
+
+        <Button onClick={handleCreateEvent}>Create Event</Button>
       </FormContainer>
 
-      {/* Notification History */}
-      <HistoryContainer>
-        <HistoryHeader>Sent Notifications</HistoryHeader>
-        {notificationHistory.length > 0 ? (
-          notificationHistory.map((notification, index) => (
-            <NotificationCard key={index}>
-              <NotificationHeader>
-                <NotificationTitle>{notification.title}</NotificationTitle>
-                <NotificationDate>
-                  {notification.date} at {notification.time}
-                </NotificationDate>
-              </NotificationHeader>
-              <NotificationContent>{notification.content}</NotificationContent>
-            </NotificationCard>
+      {/* Scheduled Events */}
+      <EventsContainer>
+        <Header>Scheduled Events</Header>
+        {events.length > 0 ? (
+          events.map((event) => (
+            <EventCard key={event.id}>
+              <EventTitle>{event.title}</EventTitle>
+              <EventDetails>{event.description}</EventDetails>
+              <EventDetails>
+                <strong>Date:</strong>{" "}
+                {new Date(event.event_date).toLocaleString()}
+              </EventDetails>
+              <EventDetails>
+                <strong>Place:</strong> {event.event_place}
+              </EventDetails>
+            </EventCard>
           ))
         ) : (
-          <p>No notifications sent yet.</p>
+          <p>No events scheduled yet.</p>
         )}
-      </HistoryContainer>
+      </EventsContainer>
     </PageContainer>
   );
 };
 
 export default Notifications;
+

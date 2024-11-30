@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Image,
@@ -6,9 +6,14 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
+  KeyboardAvoidingView,
+  ScrollView,
+  Alert,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import axios from "../utils/api";
 import Colours from "../constants/colors";
 
 const styles = StyleSheet.create({
@@ -31,12 +36,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: Colours.darkgray,
     marginTop: -90,
+    textAlign: "center",
   },
   subtext: {
-    display: "flex",
     flexDirection: "row",
-    paddingHorizontal: 20,
-    display: "flex",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 80,
@@ -58,10 +61,6 @@ const styles = StyleSheet.create({
     width: 50,
   },
   button: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    margin: "0",
     marginTop: 10,
     zIndex: 1,
   },
@@ -74,21 +73,17 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colours.white,
     fontSize: 18,
-    fontWeight: "light",
     textTransform: "uppercase",
-    fontWeight: "medium",
-    margin: 0,
+    fontWeight: "500",
   },
 });
+
 const OTPScreen = () => {
   const [otp, setOtp] = useState(["", "", "", ""]); // Four fields for OTP
   const navigation = useNavigation();
+  const route = useRoute();
 
-  // This side effect ensures navigation happens after rendering
-  useEffect(() => {
-    // Uncomment this if you need automatic redirection logic
-    // navigation.replace("MainTabs");
-  }, []); // Empty dependency array ensures this runs once when the component mounts
+  const userData = route.params?.userData; // Get the user data passed from the previous screen
 
   const handleOtpChange = (value, index) => {
     const otpArray = [...otp];
@@ -96,15 +91,29 @@ const OTPScreen = () => {
     setOtp(otpArray);
   };
 
-  // const handleSubmit = () => {
-  //   const otpValue = otp.join("");
-  //   console.log("OTP entered:", otpValue);
-  //   // Add OTP verification logic here
-  //   navigation.navigate("Dashboard"); 
-  // };
+  const verifyOtp = async () => {
+    const otpCode = otp.join(""); // Combine the OTP digits into a single string
+    if (otpCode.length !== 4) {
+      Alert.alert("Error", "Please enter a valid 4-digit OTP.");
+      return;
+    }
 
-  const navigateToDashboard = () => {
-     navigation.replace("MainTabs");
+    try {
+      const response = await axios.post("/auth/signup", {
+        ...userData,
+        otp: otpCode, // Include the OTP with user data
+      });
+
+      console.log("OTP Verified:", response.data);
+      Alert.alert("Success", "Signup completed successfully.");
+      navigation.replace("MainTabs"); // Navigate to the main dashboard
+    } catch (error) {
+      console.error(
+        "OTP Verification Error:",
+        error.response?.data || error.message
+      );
+      Alert.alert("Error", "Failed to verify OTP. Please try again.");
+    }
   };
 
   return (
@@ -112,44 +121,55 @@ const OTPScreen = () => {
       style={{ flex: 1 }}
       colors={[Colours.primary, Colours.secondary]}
     >
-      <View style={styles.container}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.heading}>
-          We've sent a message to *** *** **314
-        </Text>
-      </View>
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <TextInput
-            key={index}
-            style={styles.otpInput}
-            maxLength={1}
-            keyboardType="numeric"
-            value={digit}
-            onChangeText={(value) => handleOtpChange(value, index)}
-          />
-        ))}
-      </View>
-
-      <View style={styles.subtext}>
-        <Text>Wrong Phone Number?</Text>
-        <TouchableOpacity>
-          <Text
-            style={{ color: Colours.blue, fontWeight: "500", fontSize: 15 }}
-          >
-            Signup
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={navigateToDashboard}>
-        <LinearGradient
-          colors={["#02b4fa", "#1475fc"]} // Blue to cyan gradient
-          style={styles.gradientButton}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
         >
-          <Text style={styles.buttonText}>Login</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+          <View style={styles.container}>
+            <Image source={require("../assets/logo.png")} style={styles.logo} />
+            <Text style={styles.heading}>
+              We've sent a message to *** *** **
+              {userData?.phone_number.slice(-3)}
+            </Text>
+          </View>
+          <View style={styles.otpContainer}>
+            {otp.map((digit, index) => (
+              <TextInput
+                key={index}
+                style={styles.otpInput}
+                maxLength={1}
+                keyboardType="numeric"
+                value={digit}
+                onChangeText={(value) => handleOtpChange(value, index)}
+              />
+            ))}
+          </View>
+
+          <View style={styles.subtext}>
+            <Text>Wrong Phone Number?</Text>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text
+                style={{ color: Colours.blue, fontWeight: "500", fontSize: 15 }}
+              >
+                Signup
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.button} onPress={verifyOtp}>
+            <LinearGradient
+              colors={["#02b4fa", "#1475fc"]}
+              style={styles.gradientButton}
+            >
+              <Text style={styles.buttonText}>Verify</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 };
